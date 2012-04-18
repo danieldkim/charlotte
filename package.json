@@ -1,0 +1,16 @@
+{
+  "name"          : "charlotte",
+  "description"   : "A framework for building mobile web apps using Express and PhoneGap",
+  "homepage"      : "http://danieldkim.github.com/charlotte/",
+  "keywords"      : [ "express", "phonegap", "mobile" ],
+  "author"        : "Daniel Kim <danieldkimster@gmail.com>",
+  "version"       : "0.1.0",
+  "repository"    : { "type": "git", "url": "git://github.com/danieldkim/charlotte.git" },
+  "bugs"          : { "url" : "http://github.com/danieldkim/charlotte/issues" },
+  "licenses"      : [
+      { "type" : "MIT", "url" : "http://github.com/danieldkim/charlotte/raw/master/LICENSE" }
+  ],
+  "dependencies"  : {
+      "express"       : "~2.5.6"
+  }
+}
