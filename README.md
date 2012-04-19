@@ -231,9 +231,9 @@ invoked when all the assets have been loaded.
 You may also may want to clean up the file cache on startup. This will clean
 up all of the version caches except for the current version:
 
-    if (charlotte.inNativeApp) {
-      charlotte.clearFileCache(localStorage.getItem("version"), next);        
-    } 
+    charlotte.clearFileCache({
+      versionExceptions: [localStorage.getItem("version")]
+    }, next);
 
 `charlotte.clearFileCache()` is also async and takes a callback as the final
 argument.
@@ -652,7 +652,7 @@ that created it. Other options are described below.
 
 ### followRedirects
 
-Whether redirects on a `request()` should be followed. If false, a
+Whether redirects on a `request()` should be followed. If `false`, a
 `charlotte.RedirectError` will be generated. Default is `true`.
 
 ### layoutBody
@@ -729,8 +729,8 @@ Error handler callbacks to be invoked when an error occurs while processing a
 
 `global: function(err, tab)`
 
-The global error handler *always* gets invoked for every error. You want to
-log the error somewhere in this function.
+The global error handler *always* gets invoked for every error. Logging the
+error somewhere is something you may want to do in a global error handler.
 
 `default: function(err, tab, next)`
 
@@ -833,6 +833,9 @@ loads until the page transition is complete.)
 In addition to the common ones, a charlotte tab has the following  methods.
 
 ## createTab(options)
+
+The `createTab()` method is actually on a browser object, but it plays the
+role of constructor for a tab instance so we discuss its details here.
 
 The `baseUrl`, `rootUrl`, and `assetUrl` can be provided as options. If not
 provided, the tab instance will inherit those of the browser object that
@@ -987,7 +990,7 @@ current page. If the location being redirected to is equal to the previous
 page, the tab will automatically call `back()` on itself and then `reload()`
 that previous page. This is useful, for instance, in a modal form when you
 want the tab to automatically go back to the previous page after posting the
-form and refresh that page's contents.
+form and to refresh that page's contents.
 
 There is some magic going on to make this happen as true redirects are
 transparent to XHR clients. Charlotte monkeypatches the Express
@@ -998,7 +1001,7 @@ status and setting a `Location` header will bypass this magic. (Note: for
 non-html-bundle requests `res.redirect()` will continue to do the normal thing
 and send a `302` with a `Location` header)
 
-Currently this is only enabled for posts and uploads. I don't remember why. If
+Currently this is only enabled for posts. I don't remember why. If
 I come across a good reason to enable it for gets I will.
 
 ### Posts
@@ -1072,7 +1075,7 @@ the network for them. It only hits the network when it has to, and an
 app-level version change (more precisely, a `rootUrl`-level version change) is
 the signal that tells it to do so. The assumption of this signal is also what
 allows it to avoid any network costs (i.e. even the relatively small cost of a
-conditional GET to check if particular resource has changed) most of the time
+conditional GET to check if a particular resource has changed) most of the time
 for cached data. It also allows for partial functionality in offline
 conditions.
 
@@ -1123,6 +1126,8 @@ Here's what the [charlotte demo][demo] cache directory tree looks like:
 
 ## Versioned Asset Deployment
 
+## Cache Seed
+
 # Some general guidelines
 
 * use the charlotte asset helper methods to output script tags, link tags, and
@@ -1144,7 +1149,7 @@ Here's what the [charlotte demo][demo] cache directory tree looks like:
   `undefined` are simply excluded. when rendering client-side in a native app,
   attempts to access absent locals in your templates will result in reference
   errors. make sure all locals are defined, setting them to an appropriate
-  default if necessary, before calling `res.render`. or, alternatively make
+  default if necessary, before calling `res.render`. or, alternatively, make
   sure your template accounts for such potentially undefined values my testing
   if `'undefined' === typeof myVar` before attempting to access them.
   charlotte provides a helper method `isBlank(myVarName)` that will safely
@@ -1155,9 +1160,9 @@ Here's what the [charlotte demo][demo] cache directory tree looks like:
   is limited support for dependence on the `req` argument -- basically just
   the `referer` and `viewOnly` properties and the `flash()` method, currently.
 
-* the `flash()` method will work slightly differently when running in a native
-  app than it does when running in node. flash messages will only be
-  accessible in a native app on the immediately subsequent request, after
+* the `flash()` method will work slightly differently when running in html
+  bundle mode app than it does when running in node. flash messages will only
+  be accessible in a native app on the immediately subsequent request, after
   which they will be cleared even if not accessed during that request. that
   also means they will not be accessible on the same request that they are
   created. this fits with the general use case for the `flash()` method; your
