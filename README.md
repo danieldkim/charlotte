@@ -36,7 +36,7 @@ Also, check out the [charlotte demo][demo] app.
 
 * zepto >=1.0rc1
 
-* PhoneGap >=1.5.0
+* PhoneGap ~1.5.0 (will not work with 1.6.x)
 
 * jade (optional)
 
@@ -624,8 +624,8 @@ methods:
 * `clearFileCache(options, callback)` - clears the filesystem cache for a particular
   `rootUrl`. options are:
 
-  * **rootUrl** - the root url of the cache to to clear; if not provided
-    rootUrl of browser instance will be used.
+  * **rootUrl** - the root url of the cache to clear; if not provided the
+    rootUrl of charlotte object will be used.
 
   * **versionExceptions** - an array of version strings that should be
     *not* be cleared.
@@ -812,7 +812,7 @@ The `callback` is invoked when the request is complete and has this signature:
 
 `function(err, bundle, html, triggerReady)`
 
-* **bundle** - the html bundle object. 
+* **bundle** - the [html bundle][html_bundles] object. 
 
 * **html** - the html content that was loaded into the specified container.
 
@@ -826,7 +826,8 @@ The optional `renderWait` argument is a callback that can be used to delay the
 rendering of the bundle into HTML until some condition is met. If provided, it
 is given a callback to invoke when you're ready to render. (`tab.load()` uses
 this internally to delay the rendering of the full page on view-only-first
-loads until the page transition is complete.)
+loads until the view-only load, including transition and ready event handlers,
+has completed processing.)
 
 # tab
 
@@ -843,15 +844,15 @@ created it.
 
 Other options are:
 
-* name - a unique name for the tab.
+* **name** - a unique name for the tab.
 
-* container - CSS selector identifying the container element for the tab.
+* **container** - CSS selector identifying the container element for the tab.
 
-* contentContainer - CSS selector identifying the container element for the
+* **contentContainer** - CSS selector identifying the container element for the
   content within the tab. Scoped to the tab container. Defaults to
   '#content'.
 
-* createContentContainer - an optional callback that should be invoked when
+* **createContentContainer** - an optional callback that should be invoked when
   creating a new content container to load a new page into.
 
 The default createContentContainer function is:
@@ -985,12 +986,13 @@ have no dynamic components.
 
 The `tab.load()` method has some special handling for redirects when the
 `followRedirects` option is `true` (the default). If the location being
-redirected to is the current page, the tab will automatically `reload()` the
-current page. If the location being redirected to is equal to the previous
-page, the tab will automatically call `back()` on itself and then `reload()`
-that previous page. This is useful, for instance, in a modal form when you
-want the tab to automatically go back to the previous page after posting the
-form and to refresh that page's contents.
+redirected to is equal to the current page (not including search component of
+the urls), the tab will automatically `reload()` the current page (with the
+new location, including new search component if it exists). If it's equal to
+the previous page, the tab will automatically call `back()` on itself and then
+`reload()` that previous page. This is useful, for instance, in a modal form
+when you want the tab to automatically go back to the previous page after
+posting the form and to refresh that page's contents.
 
 There is some magic going on to make this happen as true redirects are
 transparent to XHR clients. Charlotte monkeypatches the Express
@@ -1037,11 +1039,78 @@ be displayed. The `onBack` options -- `transition` and `callback` -- specified
 when the page was loaded will be invoked. The current page will be popped from
 the stack and permanently removed from the DOM.
 
+## length()
+
+Returns the length of this tab's history.
+
+## first()
+
+Returns the `settings` for the first page loaded into this tab. 
+
+## current()
+
+Returns the `settings` for the current page in this tab.
+
+## previous()
+
+Returns the `settings` for the previous page in this tab.
+
 ## Error Handling
+
+As mentioned in the discussion on callback style, errors are generally passed
+to callback functions in the style of node, as the first argument. Charlotte
+also allows error handlers to be registered on a browser instance for errors
+that occur when attempting to load a page, either through the
+`browser.request()` method or the `tab.load()` method.
 
 ## The Error Handler Chain
 
+When an error occurs during a page load, the error is passed along a chain.
+For a `browser.request()` call the chain looks like this:
+
+    global -> default [-> callback]
+
+The chain for a `tab.load()` call is slightly different and looks like this:
+
+    global -> settings.onError || default [-> callback]
+
+Both start with the `global` handler specified in the `createBrowser()` options:
+
+`function(err, tab)`
+
+* **err** - the error.
+
+* **tab** - the tab the error occurred in if it occurred on a tab load.
+
+The global handler is always invoked for every error that occurs on a browser
+request or tab load, and is the first to be invoked. The next error handler in
+the chain will always be called immediately after the global is invoked, so no
+callback is passed to it.
+
+Next in line is the default error handler:
+
+`function(err, tab, next)`
+
+It takes the same arguments as global handler plus a callback that can be
+optionally invoked to pass the error down to the next handler in the chain.
+The default error handler can be overridden on a tab load by specifying an
+**onError** setting.
+
+Finally, if the `next` callback is invoked in the default or settings.onError
+handler, the error will be passed to the request-level callback will be
+invoked and passed the error as the first argument.
+
 ## Error Types
+
+Charlotte will generate the error types below to handle internal exceptions
+encountered while processing a request. You can check for these in your
+error handlers to handle specific error conditions.
+
+    if (err instanceof charlotte.ServerUnavailableError) {
+      alert("Server is unavailable");
+    } else if (err instanceof charlotte.ResourceNotFoundError) {
+      alert("Couldn't find that. Maybe it got deleted?");
+    ...
 
 ### charlotte.ServerUnavailableError
 
@@ -1062,6 +1131,14 @@ the stack and permanently removed from the DOM.
   template used to render the body of a response to set a property used by the
   layout body that includes it, i.e. where the cancel link should point to in
   the modal form layout body.
+
+* `semanticVersion()`
+
+* `VersionMismatchError`
+
+* `isBlank(varName)`
+
+* `parseUrl(url)`
 
 ## charlotte.pagetransitions
 
