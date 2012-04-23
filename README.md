@@ -36,7 +36,7 @@ Also, check out the [charlotte demo][demo] app.
 
 * zepto >=1.0rc1
 
-* PhoneGap >=1.5.0
+* PhoneGap >=1.6.1
 
 * jade (optional)
 
