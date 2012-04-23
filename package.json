@@ -4,7 +4,7 @@
   "homepage"      : "http://danieldkim.github.com/charlotte/",
   "keywords"      : [ "express", "phonegap", "mobile" ],
   "author"        : "Daniel Kim <danieldkimster@gmail.com>",
-  "version"       : "0.1.4",
+  "version"       : "0.1.5",
   "repository"    : { "type": "git", "url": "git://github.com/danieldkim/charlotte.git" },
   "bugs"          : { "url" : "http://github.com/danieldkim/charlotte/issues" },
   "licenses"      : [
