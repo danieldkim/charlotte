@@ -148,12 +148,12 @@ layout template or in the inner layout body depending on the presence of a
 
 The outer layout partial will only be used when rendering templates on the
 server in node. We do some basic client-side charlotte setup in it, setting
-the `baseUrl`, `assetUrl`, and `version` attributes on the global charlotte
-object. When running in [*html bundle*][html_bundles] mode and rendering
-templates on the client, the `baseUrl` and `assetUrl` attributes will be set
-by the bootstrap process , which you can see in the **Client `window` setup**
-section of this document, and the version will be handled in a different
-manner.
+the `baseUrl`, `assetRootUrl`, and `version` attributes on the global
+charlotte object. When running in [*html bundle*][html_bundles] mode and
+rendering templates on the client, the `baseUrl` and `assetRootUrl` attributes
+will be set by the bootstrap process , which you can see in the **Client
+`window` setup** section of this document, and the version will be handled in
+a different manner.
 
 # Client `window` Setup
 
@@ -531,9 +531,9 @@ The options for each of these methods are:
 * **rootUrl** - url of node server; this server will be used to retrieve the
   current version if none is provided
 
-* **assetRootUrl** - static asset server that assets will be downloaded from; the
-  `rootUrl` will be used if no assetUrl is provided here or on the object
-  itself.
+* **assetRootUrl** - static asset server that assets will be downloaded from;
+  the `rootUrl` will be used if no assetRootUrl is provided here or on the
+  object itself.
 
 If the `version`, `rootUrl`, and `assetRootUrl` options are not provided, the
 properties of the execution context will be used.
@@ -646,9 +646,9 @@ The `createBrowser()` method is actually on the `charlotte` object, but it
 plays the role of constructor for a browser instance so we discuss its details
 here.
 
-The `baseUrl`, `rootUrl`, and `assetUrl` can be provided as options. If not
-provided, the browser instance will inherit those of the `charlotte` object
-that created it. Other options are described below.
+The `baseUrl`, `rootUrl`, and `assetRootUrl` can be provided as options. If
+not provided, the browser instance will inherit those of the `charlotte`
+object that created it. Other options are described below.
 
 ### followRedirects
 
@@ -838,8 +838,8 @@ In addition to the common ones, a charlotte tab has the following  methods.
 The `createTab()` method is actually on a browser object, but it plays the
 role of constructor for a tab instance so we discuss its details here.
 
-The `baseUrl`, `rootUrl`, and `assetUrl` can be provided as options. If not
-provided, the tab instance will inherit those of the browser object that
+The `baseUrl`, `rootUrl`, and `assetRootUrl` can be provided as options. If
+not provided, the tab instance will inherit those of the browser object that
 created it.
 
 Other options are:
