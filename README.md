@@ -800,6 +800,8 @@ plus:
 
 * **onCacheMiss** - ""
 
+* **onVersionChange** - ""
+
 * **uploadOptions** - a PhoneGap
   [FileUploadOptions](http://docs.phonegap.com/en/1.5.0/phonegap_file_file.md.html#FileUploadOptions)
   object. should have a `fileUri` attribute in addition to the standard
@@ -883,7 +885,7 @@ Loads a new page into the tab. Accepts all the of the settings that zepto's
 * **onError** - override of the `errorHandler.default` browser option. 
 
 `onViewLoad`, `onLoad`, and `onBack` all take the same options, both of
-which are optional.
+which are optional:
 
 * **transition** - callback to handle the transition of the loaded content
   from staging container to current content container.
@@ -1091,20 +1093,22 @@ Next in line is the default error handler:
 
 `function(err, tab, next)`
 
-It takes the same arguments as global handler plus a callback that can be
+It takes the same arguments as the global handler plus a callback that can be
 optionally invoked to pass the error down to the next handler in the chain.
 The default error handler can be overridden on a tab load by specifying an
 **onError** setting.
 
 Finally, if the `next` callback is invoked in the default or settings.onError
-handler, the error will be passed to the request-level callback will be
-invoked and passed the error as the first argument.
+handler, the request-level callback will be invoked and passed the error as
+the first argument.
 
 ## Error Types
 
-Charlotte will generate the error types below to handle internal exceptions
-encountered while processing a request. You can check for these in your
-error handlers to handle specific error conditions.
+Charlotte will generate the errors of the types below to handle certain
+internal exceptions encountered while processing a request. You can check for
+these in your error handlers to handle these specific error conditions. For
+all other errors, including `500` responses, a simple `Error` will be
+generated.
 
     if (err instanceof charlotte.ServerUnavailableError) {
       alert("Server is unavailable");
@@ -1112,35 +1116,116 @@ error handlers to handle specific error conditions.
       alert("Couldn't find that. Maybe it got deleted?");
     ...
 
+Each of the error types below extend the `Error` object, and inherit
+properties like `name` and `message`. 
+
 ### charlotte.ServerUnavailableError
+
+Generated in any of the following situations:
+
+* host is unreachable.
+
+* connection cannot be established with server.
+
+* the server responds with 503 status.
+
+* request times out.
+
+Additional properties:
+
+* **url** - url of resource request was made for.
 
 ### charlotte.ResourceNotFoundError
 
+Generated when the server responds with a 404 status.
+
+Additional properties:
+
+* **url** - url of resource request was made for.
+
 ### charlotte.RedirectError
+
+Generated when the server redirects and `followRedirects` is false.
+
+Additional properties:
+
+* **location** - the location being redirected to.
 
 ### charlotte.AssetLoadError
 
-### charlotte.util.VersionMismatchError
+Generated when an error occurs loading javascripts or stylesheets.
 
 ## `completeBundleProcess`
- 
+
+Normally a server error will abort normal request processing and generate an
+`Error` that will be passed along the error handler chain. The server can
+prevent this from occurring by sending back a valid html bundle with a
+`completeBundleProcess` property set to `true`:
+
+    app.error(function(err, req, res){
+      res.render('500', {
+         error: err,
+         completeBundleProcess: true
+      });
+    });
+    
+
+In this case, no `Error` will be generated in the Charlotte client, the bundle
+will be processed as usual, and the error page sent by the server will be
+displayed. Note that this example merely extends the [example from the Express
+Guide](http://expressjs.com/guide.html#error-handling) by adding the
+`completeBundleProcess` flag. Here again we're leveraging code written to
+handle normal web requests by extending it to work in html bundle mode.
+
 ## charlotte.util
 
-* `propertyHelper()` this method can be used to create request scope
+### Utility methods
+
+* **propertyHelper()** - this method can be used to create request scope
   properties that can be set and accessed from templates. this allows a
   template used to render the body of a response to set a property used by the
   layout body that includes it, i.e. where the cancel link should point to in
   the modal form layout body.
 
-* `semanticVersion()`
+* **isBlank(varName)** - return true if the variable named *varName* in `this`
+  scope is `undefined`, `null`, or an empty string.
 
-* `VersionMismatchError`
+* **parseUrl(url)** - parses the *url* and returns an object with
+  [attributes](http://dev.w3.org/html5/spec/urls.html#url-decomposition-idl-attributes).
 
-* `isBlank(varName)`
+### semanticVersion(versionString)
 
-* `parseUrl(url)`
+Parses a [semantic version](http://semver.org/) string and returns an object
+with these methods:
+
+* **toString()** - returns the string representation of the version.
+
+* **compareTo(that)** - compares `this` version to `that`. returns -1 if
+  `this` is less than `that`, 0 if they're equal, and 1 if `this` is greater
+  than `that`.
+
+* **isPatchOf(that)** - returns `true` if `this` is a patch of `that` (i.e.
+  2.1.2 is a patch of 2.1.0 and 2.1.1, but not 2.0 or 2.1.3)
+
+### VersionMismatchError(localVersion, remoteVersion[, message]) 
+
+Constructor for an `Error` representing a mismatch between the version
+retrieved from local storage and the version returned from the server. Has a
+`localVersion` and `remoteVersion` property in addition to the base `Error`
+properties.
+
+Intended for use in `onVersionChange` handlers to be passed to the error
+callback chain.
 
 ## charlotte.pagetransitions
+
+To get started with your app, you can use some of the basic animations
+provided in this module in your page transition functions. You'll probably
+want to write your own custom animations for your own app.
+
+Check the
+[source](https://github.com/danieldkim/charlotte/blob/master/lib/page_transitions.js)
+for inline JSDoc API documentation.
 
 # Caching and Versioning
 
@@ -1156,36 +1241,148 @@ conditional GET to check if a particular resource has changed) most of the time
 for cached data. It also allows for partial functionality in offline
 conditions.
 
-### onVersionChange
+Versioning is server-driven and is enabled by setting the `charlotte.version`
+property on the `charlotte` node module. This is used in a few different ways
+in the Express environment:
+
+* a '/version' route is created that returns this value.
+
+* the template asset helpers use this value to auto-version all urls.
+
+* the `version()` dynamic helper returns this value.
+
+* it is included in every html bundle sent from this ever.
+
+### onVersionChange(localVersion, remoteVersion, callback)
+
+When versioning is enabled, the server side of Charlotte includes a `version`
+in every html bundle that it sends. The Charlotte client compares this version
+to the existing version stored in local storage and will call the
+`onVersionChange` handler if they're different.
+
+The handler should call the passed `callback` argument to continue request
+processing. If an error is passed to the callback, request processing will be
+aborted and the error will passed to the error handler chain. If no error is
+passed, the local storage version will be updated with the new remote version
+and request processing will proceed normally.
+
+If you are using semantic versions, this is a reasonable way to implement this
+handler:
+
+    onVersionChange: function(localVersion, remoteVersion, callback) {
+      var semanticVersion = charlotte.util.semanticVersion,
+          localSemVer = localVersion ? semanticVersion(localVersion) : null,
+          remoteSemVer = semanticVersion(remoteVersion);
+      console.log("Version changed! local: " + localVersion + ", remote: " + remoteVersion);
+      // if new version is not just a patch, send VersionMismatchError
+      callback(localSemVer && remoteSemVer.isPatchOf(localSemVer) ? 
+                 null : 
+                 new charlotte.util.VersionMismatchError(localSemVer, remoteSemVer));
+    }
+
+We use `charlotte.util.semanticVersion` to parse the version strings and
+compare them. If the remote version is just a patch of the local version, we
+call the `callback` with no error to continue normal request processing.
+Otherwise, we create a new `charlotte.util.VersionMismatchError`, passing in
+the semantic version objects to the constructor. We can then check for the
+`charlotte.util.VersionMismatchError` in an error handler and take appropriate
+action.  This is how we might handle it in our error handler:
+
+    if (err instanceof VersionMismatchError) {
+      var localVersion = err.localVersion, 
+          remoteVersion = err.remoteVersion
+      if (localVersion.compareTo(remoteVersion) > 0) { // local is greater
+        // app store update downloaded before new server version 
+        // deployed. notify user to try again later.
+        alert("New version of app not live yet.  Please try again later.");
+      } else { 
+        if (localVersion.major != remoteVersion.major) {
+          // major version update, need app store update
+          alert("Please update to latest version available in the app store.");
+        } else if (localVersion.minor != remoteVersion.minor) {
+          // minor version update, update local version and restart
+          localStorage.setItem("version", remoteVersion);
+          alert("Restart required to update.  Restarting now ...")
+          document.location = "index.html";
+        }
+      }
+    } 
+
 
 ## Filesystem Cache
 
 Charlotte uses the [PhoneGap File
 API](http://docs.phonegap.com/en/1.5.0/phonegap_file_file.md.html) to cache
-resources locally. The cache is organized by root url/version/resource host.
+resources locally. The root directory for the cache `res_cache` and is
+organized by root url/version/resource host.
 
-Here's what the [charlotte demo][demo] cache directory tree looks like:
+For example, here's what the [charlotte demo][demo] cache directory tree looks
+like:
 
-    |-local.charlottedemo.com_3000_
-     |---1.0
-     |-----local-assets.charlottedemo.com_3000
-     |-------versions
-     |---------1.0
-     |-----------lib
-     |-------------charlotte
-     |-------------common
-     |-----------messages
-     |-----------posts
-     |-----------tab_menu
-     |-----------users
-     |-----local.charlottedemo.com_3000
-     |-------posts
-     |---------new
-     |-------tab_menu
-     |-------view_only_bundles
+    |-res_cache
+    |---local.charlottedemo.com_3000_
+    |-----1.0
+    |-------local-assets.charlottedemo.com_3000
+    |---------versions
+    |-----------1.0
+    |-------------lib
+    |---------------charlotte
+    |---------------common
+    |-------------messages
+    |-------------posts
+    |-------------tab_menu
+    |-------------users
+    |-------local.charlottedemo.com_3000
+    |---------posts
+    |-----------new
+    |---------tab_menu
+    |---------view_only_bundles
 
+You can see that the directory structure under
+`local.charlottedemo.com_3000_/1.0/local-assets.charlottedemo.com_3000`
+mirrors that of the `views` directory on the server. It, is in fact a mirror
+of the server:
+
+![](https://img.skitch.com/20120502-k7h79xuxrctdag1t21jqtk77q7.jpg)
+
+The directory structure under
+`local.charlottedemo.com_3000_/1.0/local-assets.charlottedemo.com_3000`
+matches the Express route hierarchy (for those html bundle resources that are
+cached locally).
+
+![](https://img.skitch.com/20120502-kmr74h9refdcc4ay4wxhn78tu2.jpg)
+
+Bundles are stored as json files. For the resource with url `/foo/bar`, the
+bundle would be stored in `foo/bar/index.json`. Query strings gets translated
+into strings that can contribute to legal filenames, so `foo/bar?baz=qux`
+would be stored under `foo/bar__qm__baz__eq__qux.json`.
+
+View-only bundles are stored in a separate directory and with a filename based
+on the key they are registered under, plus query string.
+
+You can delete any file individually in the filesystem cache and charlotte
+will automatically refresh it (this will generate a **cacheMiss** event). You
+can also edit a file directly in the cache if you wish. The changes will not
+be reflected in the running app, however, until the app is restarted due to
+the RAM cache ...
 
 ## RAM Cache
+
+All resources that are cached in the filesystem are also cached in memory.
+Once read from the filesystem Charlotte will not have to go to it again for a
+particular resource until the app is evicted from memory.
+
+### Temp cache
+
+There is one set of resources that is *only* cached in memory and not
+permanently in the filesystem. These resources are specified by the
+`cachedBundes.tempUrlMatchers` browser option. The local cache for the such
+resources lives only as long as the app is active in main memory.
+
+The overall size of this cache can be controlled with the
+`charlotte.tempCacheSize` property. Temp cache sizes cannot be controlled at
+the individual browser instance level. Older cache entries will be removed to
+make room for newer ones when the cache size is exceeded.
 
 ## Resource types
 
@@ -1197,13 +1394,76 @@ Here's what the [charlotte demo][demo] cache directory tree looks like:
 
 ### Images
 
-## Html Bundles
+### Html Bundles
 
 ## Disabling Caching for Development
 
+Caching can be disabled very simply by disabling versioning, which setting
+`charlotte.version` to a falsy value will accomplish. When `charlotte.version`
+is falsy, Charlotte caches will never be consulted and every resource request
+will generate a real browser request against the server.
+
+**Note:** this does nothing to defeat any normal web caching that you're doing
+outside of Charlotte. i.e., if an `Expires` header was set with a date in the
+future, then the desktop browser or WebView could still serve a cached version
+out of *its* cache.
+
+This can be useful in development. With caching disabled, a page reload in a
+charlotte tab will load all resources again from the server. Gotchas with
+this when loading pages in html bundle mode:
+
+* only additive or overwriting changes will take effect. i.e., removing a
+  style in a stylesheet on the server will not cause that style to be removed
+  from the DOM when the page is reloaded. an app restart is required for
+  deletions to take effect even with caching disabled (for a simulation
+  index.html file in a desktop browser a restart is just a true browser reload
+  of the index.html file).
+
+* though old script tags are removed from the DOM when caching is disabled,
+  they do not get removed from the list of scripts on the Scripts panel in the
+  WebKit Developer Tools. you end up with lots of duplicates in the list very
+  quickly as you click around in your app. this can make it difficult to find
+  the right script to set a breakpoint in. for this reason, you'll probably
+  want to enable caching when you need to use the debugger.
+
 ## Versioned Asset Deployment
 
+As you deploy new server versions across your cluster, there will a period of
+time when some nodes in your cluster are on the new version and some are on
+the old, until all the nodes are updated. To ensure that the correct version
+of the assets are always available for any given request during this time
+deploy the new assets ahead of the new server version, while continuing to
+serve the previous/existing version of the assets. Once the new assets are
+fully deployed, propagated through your CDN, etc. then begin deploying the new
+server version. This means that for production, `/views/versions/1.0` cannot
+just be a symlink to `/views' but should be a full copy of it. Once the new
+server version is completely deployed across all nodes you can delete the
+previous version.
+
+
 ## Cache Seed
+
+If Charlotte cannot find a resource in the memory or in the filesystem cache,
+it will look in the cache seed location before requesting the resource from
+the server. Thus the order of locations Charlotte looks for a resource in is:
+
+    RAM -> filesystem -> cache seed -> server
+
+The cache seed can be used to ship assets and html bundles with your native
+app distribution. This can allow the app to function even if started for the
+first time when offline. In fact, you **should** put at a bare minimum enough
+in the cache seed to at least display the view-only version of the home page
+and a user friendly message if the server is unreachable when the app is
+initially booted.
+
+The default cache seed location is `./cache_seed`, which would be
+`www/cache_seed` in your PhoneGap app. 
+
+The structure of the cache seed mirrors that of the filesystem cache. To
+determine exactly what content to put into your cache seed, you can simply run
+your app in the iOS simulator with versioning/caching enabled, hitting the
+pages that you want to be available on initial boot even if offline. Then copy
+the relevant directories and files over to the cache seed location.
 
 # Some general guidelines
 
@@ -1232,10 +1492,6 @@ Here's what the [charlotte demo][demo] cache directory tree looks like:
   charlotte provides a helper method `isBlank(myVarName)` that will safely
   check if the variable named myVarName is undefined, `null`, or an empty
   string.
-
-* dynamic helpers that depend on the `res` argument are not supported. there
-  is limited support for dependence on the `req` argument -- basically just
-  the `referer` and `viewOnly` properties and the `flash()` method, currently.
 
 * the `flash()` method will work slightly differently when running in html
   bundle mode app than it does when running in node. flash messages will only
