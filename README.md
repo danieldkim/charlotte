@@ -792,7 +792,8 @@ plus:
 
 * **viewOnly** - whether this is a view-only request
 
-* **container** - the DOM container into which the page should be loaded.
+* **container** - the DOM container into which the page should be loaded; can
+  be CSS selector or actual element object.
 
 * **followRedirects** - override of the browser option with the same name.
 
@@ -1421,10 +1422,14 @@ this when loading pages in html bundle mode:
 
 * though old script tags are removed from the DOM when caching is disabled,
   they do not get removed from the list of scripts on the Scripts panel in the
-  WebKit Developer Tools. you end up with lots of duplicates in the list very
-  quickly as you click around in your app. this can make it difficult to find
-  the right script to set a breakpoint in. for this reason, you'll probably
-  want to enable caching when you need to use the debugger.
+  Developer Tools in Chrome. you end up with lots of duplicates in the list
+  very quickly as you click around in your app. this can make it difficult to
+  find the right script to set a breakpoint in. for this reason, you'll
+  probably want to enable caching when you need to use the debugger. **Note**:
+  inline scripts are used in non-Chrome environments when caching is disabled.
+  these do not even appear at all in the Scripts panel in Web Inspector
+  desktop Safari.
+
 
 ## Versioned Asset Deployment
 
