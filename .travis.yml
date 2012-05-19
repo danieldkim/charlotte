@@ -3,4 +3,4 @@ node_js:
   - 0.6
 before_script:
   - cd test
-  - coffee -c -o out -w .
+  - coffee -c -o out .
