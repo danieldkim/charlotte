@@ -22,6 +22,6 @@
     "jade"  : ">=0.26.0"
   },
   "scripts": {
-    "test": "test/run_all_tests.sh"
+    "test": "cd test && ./run_all_tests.sh"
   }
 }
