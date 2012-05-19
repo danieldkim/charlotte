@@ -2,5 +2,8 @@ language: node_js
 node_js:
   - 0.6
 before_script:
+  - 'sudo apt-get update'
+  - 'sudo apt-get install coffeescript'
+before_script:
   - cd test
   - coffee -c -o out .
