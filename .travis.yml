@@ -5,3 +5,4 @@ before_script:
   - npm install -g coffee-script
   - cd test
   - coffee -c -o out .
+  - cd ..
