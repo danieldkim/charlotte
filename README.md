@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/danieldkim/charlotte.png?branch=master)](http://travis-ci.org/danieldkim/charlotte)
+
 # Introduction
 
 Charlotte is a framework for building mobile hybrid web/native apps using
