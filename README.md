@@ -954,8 +954,8 @@ actually coordinate the handling of 2 distinct html bundle requests:
 * one request with the provided url
 
 The Express route for the url can detect this parameter with the
-charlotte-provided `req.viewOnly` property and should render a response that
-does not block on any external IO and returns a response immediately:
+charlotte-provided `req.viewOnly` property and render a response immediately,
+avoiding any unnecessary IO or computation:
 
     app.get('/posts', function(req, res) {
 
