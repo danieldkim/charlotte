@@ -1033,6 +1033,23 @@ through a series of error response pages. See the [charlotte demo][demo] for
 an example of this and it should be more clear why this special handling is a
 good thing for native apps.
 
+### Scrolltops
+
+Depending on what you do in your transitions, there's a decent chance the
+scroll positions of any scrolled elements on a page will be missing when it is
+returned to on `tab.back()`. To allow your transitions to restore the scroll
+position when you transition the page back into the viewport, `tab.load()`
+uses zepto's `data()` method to store the `scrollTop` values of all elements
+that are `.scrolled` on the content container. It is stored on the content
+container element under the key `scrollTops`. The data object itself stores
+the `scrollTop` of each scrolled element within the container under the `id`
+of the scrolled element as the key.
+
+The `charlotte.pagetransitions` module makes use of these data objects to
+restore scrollTops on staged content containers when transitioning them in.
+Have a look there for an example of how to use this data in your own
+transitions.
+
 ## reload(callback)
 
 Reloads the current page in the tab.
