@@ -349,7 +349,7 @@ Call the `charlotte.ready()` method to register functions to execute when the
 page is ready:
 
     script(type="text/javascript")
-      charlotte.ready('#{requestId}', function(callback) {
+      charlotte.ready('!{requestId}', function(callback) {
         $('#body-frame', this.container).height(window.innerHeight - 40);
         callback();
       });
@@ -359,7 +359,9 @@ page is ready:
 * requestId - the id of the current request. you don't need to worry about
   what this is or how to get it -- charlotte provides it to you through the
   `requestId` helper in the template API. just interpolate the value into the
-  template and pass it to the ready() method.
+  template and pass it to the ready() method (be sure to use the unescaped
+  form of interpolation).
+
 * your handler.  
 
 Charlotte provides two things to your handler function. 
@@ -573,7 +575,7 @@ Modules are defined using the `charlotte.define()` method.
 In many cases, all you want to do in your `ready` event handlers is require a
 module and invoke it in this manner:
 
-    charlotte.ready('#{requestId}', function(callback) {
+    charlotte.ready('!{requestId}', function(callback) {
       this.require(
         {
           dependencies: ['foo/bar']
@@ -589,7 +591,7 @@ Charlotte will automatically require the module and call it using the
 execution context as `this`, and pass the `ready` handler callback as the only
 argument. The code below is equivalent to the above:
 
-    charlotte.ready('#{requestId}', 'foo/bar');
+    charlotte.ready('!{requestId}', 'foo/bar');
   
 # charlotte
 
