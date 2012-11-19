@@ -58,25 +58,31 @@ Set a version:
 
 Support express (do this just before you use the router middleware):
 
-    charlotte.supportExpress(app);
-    app.use(app.router);
-    
-Serve up views statically:
+    charlotte.supportExpress(app, { 
+      assetRootUrl: 'http://assets.local.host:3000/',
+      viewExtensions: 'default' 
+    });
+    app.use(app.router);    
+
+The `assetRootUrl` option will be used by the [asset helpers](#asset-helpers)
+when outputting urls for asset tags. This can be omitted if not using a
+separate asset server. 
+
+The `viewExtensions` option specifies the extensions of view resources that
+should be served statically. This is useful if you have static file paths that
+match/conflict with any of your Express routes, and can be omitted if you
+don't. Should also be omitted in environments where static asset requests are
+served by a separate server and never enter node. If 'default' is specified
+these are the extensions that will be served statically:
+
+    ['jade', 'css', 'js', 'jpg', 'gif', 'png']
+
+There is also a `templateExtensions` option that will simply add the specified
+template extensions to the default view extensions.
+
+Serve up all views statically:
 
     app.use(express.static(__dirname + '/views'));
-
-Use the `charlotte.byPassViews` route middleware in routes:
-
-    var bypassViews = process.env.NODE_ENV == 'development' ? 
-                        charlotte.bypassViews() : function(req, res, next) { next(); };
-
-    app.get('/', bypassViews, function(req, res) {
-    ...
-
-
-The above assumes that we don't need to worry about bypassing views in
-non-development environments as static asset files will be served out of a
-different server.
 
 Create a symlink to the charlotte module's lib directory somewhere in your
 views directory:
@@ -247,7 +253,7 @@ The template API provides a common set of variables and helper functions that
 templates can use whether they are running on the server within node or on the
 client.
 
-## Asset Helpers
+## <a id="asset-helpers"></a>Asset Helpers
 
 Asset helpers should *always* be used to include application assets. The
 output shown below can be considered to be the *logical* output of these
@@ -262,8 +268,8 @@ this:
     != javascripts('/js/underscore', '/js/async')
 will output this:
 
-    <script type="text/javascript" src="http://local.host:3000/versions/1.0/js/underscore.js"></script>
-    <script type="text/javascript" src="http://local.host:3000/versions/1.0/js/async.js"></script>
+    <script type="text/javascript" src="http://assets.local.host:3000/versions/1.0/js/underscore.js"></script>
+    <script type="text/javascript" src="http://assets.local.host:3000/versions/1.0/js/async.js"></script>
 
 
 ### stylesheets
@@ -273,8 +279,8 @@ this:
     != stylesheets('/css/foo', '/foo/bar')
 will output this:
 
-    <link rel="stylesheet" type="text/css" href="http://local.host:3000/versions/1.0/css/foo.css"></link>
-    <link rel="stylesheet" type="text/css" href="http://local.host:3000/versions/1.0/css/bar.css"></link>
+    <link rel="stylesheet" type="text/css" href="http://assets.local.host:3000/versions/1.0/css/foo.css"></link>
+    <link rel="stylesheet" type="text/css" href="http://assets.local.host:3000/versions/1.0/css/bar.css"></link>
 
 ### img
 
@@ -283,7 +289,7 @@ this:
     != img({src: '/img/foo.jpg'})
 will output this:
 
-    <img src="http://local.host:3000/versions/1.0/img/foo.jpg"></img>
+    <img src="http://assets.local.host:3000/versions/1.0/img/foo.jpg"></img>
     
 
 Do not use the `img` helper to include non-application-asset images such as
