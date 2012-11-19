@@ -1017,8 +1017,8 @@ status and setting a `Location` header will bypass this magic. (Note: for
 non-html-bundle requests `res.redirect()` will continue to do the normal thing
 and send a `302` with a `Location` header)
 
-Currently this is only enabled for posts. I don't remember why. If
-I come across a good reason to enable it for gets I will.
+This special handling is only enabled for posts as the default behavior of
+redirects being transparent to Charlotte works well for GET's.
 
 ### Posts
 
