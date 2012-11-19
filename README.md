@@ -1011,7 +1011,7 @@ posting the form and to refresh that page's contents.
 There is some magic going on to make this happen as true redirects are
 transparent to XHR clients. Charlotte monkeypatches the Express
 `res.redirect()` method to make these pseudo-redirects visible to the
-charlotte client runtime. As long as `res.render()` is used to do redirects,
+charlotte client runtime. As long as `res.redirect()` is used to do redirects,
 this behavior will be observed. Issuing a true redirect by setting a `302`
 status and setting a `Location` header will bypass this magic. (Note: for
 non-html-bundle requests `res.redirect()` will continue to do the normal thing
