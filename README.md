@@ -1074,6 +1074,19 @@ the stack and permanently removed from the DOM.
 
 Returns the length of this tab's history.
 
+## pendingLength
+
+The length that this tab's history is *about* to be. This property exists
+between the time a `load()` is initiated and either the view or the full page
+is rendered. This is useful within the view code if you want to do something
+based on where the page that is currently being rendered is in the tab
+history, i.e:
+
+    // context is a tab if it has a container
+    if (requestId && context.container)
+      if (context.pendingLength > 1)
+        // add a back button to the nav bar
+
 ## first()
 
 Returns the `settings` for the first page loaded into this tab. 
