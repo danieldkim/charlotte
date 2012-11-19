@@ -300,6 +300,11 @@ application itself, i.e. icons.
 * NODE_ENV - the value of the `NODE_ENV` environment variable (e.g.,
   development, production, etc.).
 
+* context - the context within which this template is executing. will be the
+  Express `app` object when rendered server-side; can be either a *browser* or
+  a *tab* of when executing client-side (see discussion of **[Charlotte,
+  Browsers, and Tabs](#charlotte-browsers-and-tabs)** below).
+
 * rootUrl - the root url of the charlotte object, browser, or tab within which
   this template is rendered.
  
@@ -379,11 +384,13 @@ callback halts the execution chain.
 The second thing that charlotte provides to your handler is the value of
 `this`. What is `this`, you ask? Read on to learn more ...
 
-## Charlotte, Browsers, and Tabs
+## <a id="charlotte-browsers-and-tabs"></a>Charlotte, Browsers, and Tabs
 
-A page in a charlotte-based app can be executing in one of three possible
-scopes or contexts, depending on how the page was loaded into the `window`.
-The execution context defines the value of `this` in the page's `ready` event
+The JavaScript executing in a rendered page in the client environment (i.e.,
+after the template has been executed and the html generated) in a
+charlotte-based app can be executing in one of three possible scopes or
+contexts, depending on how the page was loaded into the `window`. The
+execution context defines the value of `this` in the page's `ready` event
 handlers.
 
 `this` is useful in a few of ways in your handler:
