@@ -491,13 +491,13 @@ be used properly. Use zepto's `on()` method to attach event handlers, not
 
 Charlotte provides a couple of couple convenience methods on the execution
 context -- `on()` and `find()` -- that are automatically scoped to the
-context's content container. Using `on()`, the above can be written like so:
+context's content container. Tabs also have an `isATab` property set to
+`true`. Using `isATab` and `on()`, the above can be written like so:
 
     function(callback) {
-      var self = this,
-          container = self.container;
+      var self = this;
 
-      if (container) {
+      if (self.isATab) {
 
         self.on('click', '#nav-bar .button.left', function(e) {
           e.preventDefault();
@@ -911,6 +911,10 @@ The default createContentContainer function is:
       return container;
     }
 
+## isATab
+
+Self-explanatory.  Always equal to `true`.
+
 ## load(settings)
 
 Loads a new page into the tab. Accepts all the of the settings that zepto's
@@ -1111,13 +1115,11 @@ Returns the length of this tab's history.
 
 The length that this tab's history is *about* to be. This property exists
 between the time a `load()` is initiated and either the view or the full page
-is rendered. This is useful within the view code if you want to do something
-based on where the page that is currently being rendered is in the tab
-history, i.e:
+is rendered. This is useful within the template code if you want to do
+something based on where the page that is currently being rendered is in the
+tab history, i.e:
 
-    // context is a tab if it has a container
-    if (requestId && context.container)
-      if (context.pendingLength > 1)
+    if (context.pendingLength > 1)
         // add a back button to the nav bar
 
 ## first()
