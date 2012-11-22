@@ -452,7 +452,6 @@ in a tab execution context. It should also be used to scope any selector-based
 operations. We use the tab `container` property above and it's
 `contentContainer` property to select the root for event delegation.
 
-
 ### Charlotte browser
 
 When you load a page into the DOM using the `request()` method on a charlotte
@@ -490,6 +489,26 @@ be used properly. Use zepto's `on()` method to attach event handlers, not
       callback();
     }
 
+Charlotte provides a couple of couple convenience methods on the execution
+context -- `on()` and `find()` -- that are automatically scoped to the
+context's content container. Using `on()`, the above can be written like so:
+
+    function(callback) {
+      var self = this,
+          container = self.container;
+
+      if (container) {
+
+        self.on('click', '#nav-bar .button.left', function(e) {
+          e.preventDefault();
+          self.back();
+        });
+
+      }
+      callback();
+    }
+
+
 Charlotte will detach all event handlers from a page's content container when
 `tab.back()` is called, to prevent any possible memory leaks. If you are
 attaching event handlers to elements outside of the context of tabs in your
@@ -518,6 +537,10 @@ All of the execution contexts have these properties:
 * **assetRootUrl** - the root url of the static asset server, used to resolve
   all relative asset paths. if no `assetRootUrl` is provided, the `rootUrl`
   will be used.
+
+* **contentContainer** - CSS selector identifying the container element for
+  the content within this context (implicitly scoped to this context).
+  defaults to '#content'.
 
 Generally, it is only necessary to set these properties on the global
 `charlotte` object, as browsers created by it will inherit these values, and
@@ -605,7 +628,15 @@ execution context as `this`, and pass the `ready` handler callback as the only
 argument. The code below is equivalent to the above:
 
     charlotte.ready('!{requestId}', 'foo/bar');
-  
+    
+### DOM methods 
+
+* `find(selector)` - executes a Zepto `find()` within the content container for
+  this context.
+
+* `on(type, [selector], handler)` - executes a Zepto `on()` on the content
+  container for this context .
+
 # charlotte
 
 In addition to the common ones, the charlotte object has these properties and
@@ -867,10 +898,6 @@ Other options are:
 * **name** - a unique name for the tab.
 
 * **container** - CSS selector identifying the container element for the tab.
-
-* **contentContainer** - CSS selector identifying the container element for the
-  content within the tab. Scoped to the tab container. Defaults to
-  '#content'.
 
 * **createContentContainer** - an optional callback that should be invoked when
   creating a new content container to load a new page into.
