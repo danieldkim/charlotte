@@ -976,10 +976,11 @@ will be automatically executed.
 
 The `onBack` callback looks like:
 
-`function(options)`
+`function(options, callback)`
 
 The `options` are user-defined, and are whatever was passed in the
-`tab.back()` call.
+`tab.back()` call. The `callback` argument should be called when done doing
+what it has to do.
 
 ### Transitions
 
@@ -1055,14 +1056,23 @@ have no dynamic components.
 ### Redirects
 
 The `tab.load()` method has some special handling for redirects when the
-`followRedirects` option is `true` (the default). If the location being
-redirected to is equal to the current page (not including search component of
-the urls), the tab will automatically `reload()` the current page (with the
-new location, including new search component if it exists). If it's equal to
-the previous page, the tab will automatically call `back()` on itself and then
-`reload()` that previous page. This is useful, for instance, in a modal form
-when you want the tab to automatically go back to the previous page after
-posting the form and to refresh that page's contents.
+`followRedirects` option is `true` (the default). When a redirect is handled
+Charlotte keeps track of the original request that generated the redirect. If
+the page is `reload()`-ed, the original request is attempted again as a server
+state change that would affect the logic of the redirect may have occurred
+since the page was originally loaded.
+
+Charlotte also does some special things for certain kinds of redirects. If the
+location being redirected to is equal to the current page (not including
+search component of the urls), the tab will automatically `reload()` the
+current page (with the new location, including new search component if it
+exists). If it's equal to the previous page, the tab will automatically call
+`back()` on itself and then `reload()` that previous page. This is useful, for
+instance, in a modal form when you want the tab to automatically go back to
+the previous page after posting the form and to refresh that page's contents.
+Note: if the page being reloaded in either of these scenarios is itself the
+result of a redirect the special handling mentioned above also applies to that
+reload.
 
 There is some magic going on to make this happen as true redirects are
 transparent to XHR clients. Charlotte monkeypatches the Express
@@ -1072,9 +1082,6 @@ this behavior will be observed. Issuing a true redirect by setting a `302`
 status and setting a `Location` header will bypass this magic. (Note: for
 non-html-bundle requests `res.redirect()` will continue to do the normal thing
 and send a `302` with a `Location` header)
-
-This special handling is only enabled for posts as the default behavior of
-redirects being transparent to Charlotte works well for GET's.
 
 ### Posts
 
@@ -1119,12 +1126,17 @@ transitions.
 
 Reloads the current page in the tab.
 
-## back(options)
+## back(options[, callback])
 
 Goes back in the tab history, causing the previous page in the tab history to
-be displayed. The `onBack` options -- `transition` and `callback` -- specified
-when the page was loaded will be invoked. The current page will be popped from
-the stack and permanently removed from the DOM.
+be displayed. The current page will be popped from the stack and permanently
+removed from the DOM. The `onBack` options for the current page --
+`transition` and `callback` -- will be invoked. The `options` argument passed
+as here as the first argument to `back()` will be passed to the
+`onBack.callback` option that exists on the current page. When they are
+complete the `callback` argument, if it exists, will be invoked. Any errors
+that occurred in the `transition` or `callback` options of the page will be
+passed to the `back()` callback.
 
 ## length()
 
