@@ -832,11 +832,14 @@ A function that takes a content container that is being removed from the DOM
 and does any necessary clean up, such as [cleaning up
 images](http://www.fngtps.com/2010/mobile-safari-image-resource-limit-workaround/)
 (cleanup of event handlers added to the `contentCtr` through Zepto's `on()`
-method is already taken care of by Charlotte). This will be called when
-destroying any pages created by any tabs created by this browser.
+method is already taken care of by Charlotte). It will be called be called on
+the specified container of any [`request()`](#request) calls before inserting
+the response html into it.
 
-There are three instances in which a content container for a tab is destroyed
-and the `onDestroy()` callback called with it:
+This callback will also be called when destroying any pages created by any
+tabs created by this browser. There are three instances in which a content
+container for a tab is destroyed and the `onDestroy()` callback called with
+it:
 
 * on a [`viewOnly`](#view-only-first-loads) load, on the view-only content
   before loading the full page.
@@ -858,7 +861,7 @@ Returns the currently selected tab.
 
 Switches to the tab with the give `name`.
 
-## request(settings, callback[, renderWait])
+## <a id="request"></a>request(settings, callback[, renderWait])
 
 Issues an [html bundle][html_bundles] request.
 
@@ -878,6 +881,8 @@ plus:
 
 * **onVersionChange** - ""
 
+* **onDestroy** - ""
+
 * **uploadOptions** - a PhoneGap
   [FileUploadOptions](http://docs.phonegap.com/en/1.5.0/phonegap_file_file.md.html#FileUploadOptions)
   object. should have a `fileUri` attribute in addition to the standard
@@ -885,6 +890,7 @@ plus:
   PhoneGap
   [FileTransfer](http://docs.phonegap.com/en/1.0.0/phonegap_file_file.md.html#FileTransfer)
   object is done.
+
 
 The `callback` is invoked when the request is complete and has this signature:
 
