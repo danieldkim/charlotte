@@ -308,8 +308,8 @@ application itself, i.e. icons.
 
 * context - the context within which this template is executing. will be the
   Express `app` object when rendered server-side; can be either a *browser* or
-  a *tab* of when executing client-side (see discussion of **[Charlotte,
-  Browsers, and Tabs](#charlotte-browsers-and-tabs)** below).
+  a *page* when executing client-side (see discussion of **[Charlotte,
+  Browsers, Tabs, and Pages](#charlotte-browsers-tabs-and-pages)** below).
 
 * rootUrl - the root url of the charlotte object, browser, or tab within which
   this template is rendered.
@@ -390,7 +390,7 @@ callback halts the execution chain.
 The second thing that charlotte provides to your handler is the value of
 `this`. What is `this`, you ask? Read on to learn more ...
 
-## <a id="charlotte-browsers-and-tabs"></a>Charlotte, Browsers, and Tabs
+## <a id="charlotte-browsers-tabs-and-pages"></a>Charlotte, Browsers, Tabs, and Pages
 
 The JavaScript executing in a rendered page in the client environment (i.e.,
 after the template has been executed and the html generated) in a
@@ -410,7 +410,7 @@ handlers.
 
 * you can do some duck-typing on it to do different things depending on what
   the execution context is. for example, you will usually only want to
-  override anchor tag click handlers when executing within a tab context.
+  override anchor tag click handlers when executing within a page context.
 
 ### Global charlotte object
 
@@ -418,12 +418,13 @@ When not executing in [*html bundle*][html_bundles] mode, with templates being
 rendered on the server in node, `this` in your ready handler is the global
 `window.charlotte` object.
 
-### Charlotte browser tab
+### Charlotte browser tab page
 
-Most pages in your app will be loaded into a charlotte browser tab. Tabs
-maintain history as you load pages into them. You can go back and you can
-reload. This is when you'll want to override anchor tag click handlers to load
-linked pages into the current tab, or to go back in the history.
+Most pages in your app will be loaded into a page of a tab in a charlotte
+browser. Tabs maintain history as you load pages into them. You can go back
+and you can reload. This is when you'll want to override anchor tag click
+handlers to load linked pages into the current tab, or to go back in the
+history.
 
     function(callback) {
       var self = this,
@@ -431,12 +432,12 @@ linked pages into the current tab, or to go back in the history.
 
       if (container) {
 
-        $(self.contentContainer, container).on('click', '#nav-bar .button.left', function(e) {
+        $(container).on('click', '#nav-bar .button.left', function(e) {
           e.preventDefault();
           self.back();
         });
     
-        $(self.contentContainer, container).on("click", 'a.post.show', function(e) {
+        $(container).on("click", 'a.post.show', function(e) {
           e.preventDefault();
           // this load is not very interesting without some load and back transitions
           // but i'm keeping this example short
@@ -447,10 +448,10 @@ linked pages into the current tab, or to go back in the history.
       callback();
     }        
 
-Only tabs have a `container` property so we use it above to determine if we're
-in a tab execution context. It should also be used to scope any selector-based
-operations. We use the tab `container` property above and it's
-`contentContainer` property to select the root for event delegation.
+Only pages have a `container` property so we use it above to determine if
+we're in a page execution context. It should also be used to scope any
+selector-based operations. We use the page `container` property to select the
+root for event delegation.
 
 ### Charlotte browser
 
@@ -471,8 +472,8 @@ single-page application, and pages are removed from the DOM as they are popped
 off the stack, it is important that [event
 delegation](http://www.sitepoint.com/javascript-event-delegation-is-easier-than-you-think/)
 be used properly. Use zepto's `on()` method to attach event handlers, not
-`bind()`. In a tab execution context, use the supplied `container` and
-`contentContainer` properties to select the root for event delegation:
+`bind()`. In a page execution context, use the supplied `container` property
+to select the root for event delegation:
 
     function(callback) {
       var self = this,
@@ -480,7 +481,7 @@ be used properly. Use zepto's `on()` method to attach event handlers, not
 
       if (container) {
 
-        $(self.contentContainer, container).on('click', '#nav-bar .button.left', function(e) {
+        $(container).on('click', '#nav-bar .button.left', function(e) {
           e.preventDefault();
           self.back();
         });
@@ -489,15 +490,15 @@ be used properly. Use zepto's `on()` method to attach event handlers, not
       callback();
     }
 
-Charlotte provides a couple of couple convenience methods on the execution
-context -- `on()` and `find()` -- that are automatically scoped to the
-context's content container. Tabs also have an `isATab` property set to
-`true`. Using `isATab` and `on()`, the above can be written like so:
+Charlotte provides a couple of convenience methods on the execution context --
+`on()` and `find()` -- that are automatically scoped to the context's
+container. Pages also have an `isAPage` property set to `true`. Using
+`isAPage` and `on()`, the above can be written like so:
 
     function(callback) {
       var self = this;
 
-      if (self.isATab) {
+      if (self.isAPage) {
 
         self.on('click', '#nav-bar .button.left', function(e) {
           e.preventDefault();
@@ -509,11 +510,8 @@ context's content container. Tabs also have an `isATab` property set to
     }
 
 
-Charlotte will detach all event handlers from a page's content container when
-`tab.back()` is called, to prevent any possible memory leaks. If you are
-attaching event handlers to elements outside of the context of tabs in your
-app then you are responsible for detaching those handlers when you remove the
-elements from the DOM.
+Charlotte will detach all event handlers from a page's container when `back()`
+is called, to prevent any possible memory leaks.
 
 ## Common properties
 
@@ -686,7 +684,7 @@ methods:
 
 # browser
 
-In addition to the common ones, a charlotte browser has the following methods.
+In addition to the common ones, a charlotte browser has the following properties.
 
 ## createBrowser(options)
 
@@ -848,6 +846,40 @@ it:
 
 * when `back()` is called on a page.
 
+### archiver[(tab, page)]
+
+A function that takes a tab and a page argument and that when invoked creates
+an object with `onArchive(contentCtr)` and `onRestore(contentCtr)` methods
+(both methods are optional). The relevant method will be called on the
+returned object whenever the given page is archived/restored.
+
+The archiver function itself will be invoked just before the page is archived.
+Optionally, it is simply an object with the relevant methods.
+
+A page is archived (taken out of the DOM) when a new page is loaded into the
+tab, and restored when the page is returned to when `back()` is called on the
+next page.
+
+You'll want to do the same sort of cleaning up that you do in your
+`onDestroy()` callbacks, but in a way that allows the cleaned up state to be
+restored when the page is returned to.  For example:
+
+    archiver: function(tab, page) {
+      return {
+        onArchive: function(contentCtr) {
+          $('img', contentCtr).each(function() {
+            this._src = this.src;
+            return this.src = TINY_GIF;
+          });
+        },
+        onRestore: function(contentCtr) {
+          return $('img', contentCtr).each(function() {
+            return this.src = this._src;
+          });
+        }
+      };
+    }
+
 
 ## createTab(options)
 
@@ -893,6 +925,8 @@ plus:
   called on the **container** provided before adding response HTML. will be
   called before the browser callback.
 
+* **archiver** - same as the browser option with the same name; will be called
+  before the browser callback.
 
 The `callback` is invoked when the request is complete and has this signature:
 
@@ -917,7 +951,7 @@ has completed processing.)
 
 # tab
 
-In addition to the common ones, a charlotte tab has the following  methods.
+In addition to the common ones, a charlotte tab has the following properties.
 
 ## createTab(options)
 
@@ -932,9 +966,9 @@ A `transitions` option can be provided that will override the transitions
 [generated by] the `transitions` option to `createBrowser()`. Here, it should
 always be an object, not a function.
 
-An `onDestroy` option can be provided that will will *supplement* the browser
-option, and be called before it in any of the destruction scenarios in which
-it is called.
+`onDestroy` and `archiver` options can be provided that will will *supplement*
+the browser options, and be called before them in any of the respective
+scenarios in which they're called.
 
 Other options are:
 
@@ -954,14 +988,10 @@ The default createContentContainer function is:
       return container;
     }
 
-## isATab
+## <a id="tab-load"></a>load(page)
 
-Self-explanatory.  Always equal to `true`.
-
-## <a id="tab-load"></a>load(settings)
-
-Loads a new page into the tab. Accepts all the of the settings that zepto's
-`ajax()` method takes plus:
+Loads a new page into the tab. A page is a basically an extension of the
+settings object that zepto's `ajax()` accepts plus:
 
 * **followRedirects** - override of the browser option with the same name.
 
@@ -1177,30 +1207,55 @@ passed to the `back()` callback.
 
 Returns the length of this tab's history.
 
-## pendingLength
-
-The length that this tab's history is *about* to be. This property exists
-between the time a `load()` is initiated and either the view or the full page
-is rendered. This is useful within the template code if you want to do
-something based on where the page that is currently being rendered is in the
-tab history, i.e:
-
-    if (context.pendingLength > 1)
-        // add a back button to the nav bar
-
 ## first()
 
-Returns the `settings` for the first page loaded into this tab. 
+Returns the first page loaded into this tab. 
 
 ## current()
 
-Returns the `settings` for the current page in this tab.
+Returns the current page in this tab.
 
 ## previous()
 
-Returns the `settings` for the previous page in this tab.
+Returns the previous page in this tab.
 
-## Error Handling
+# page
+
+A page is a basically an extension of the settings object that zepto’s ajax()
+accepts. The page object includes all of the properties passed in the `load()`
+call (such as `url`, `type`, etc.). In addition to those properties and the
+common charlotte properties, a charlotte page has the properties below.
+
+It's worth noting here that one property in particular that can be useful to
+**set** from your within your `ready()` event handler code is the `archiver`
+property.
+
+## index
+
+The index of this page in the tab history. Can be useful in your view template
+code when you want to do something based on where in the tab history the page
+is being loaded: 
+
+    if (context.index > 0) 
+      // add a back button to the nav bar
+
+## isAPage
+
+Self-explanatory.  Always `true`.
+
+## `load()`, `reload()`, and `back()`
+
+These methods delegate to the containing tab.
+
+## tab
+ 
+The tab that this page was loaded into.
+
+## browser
+
+The browser that created the tab that this page was loaded into.
+
+# Error Handling
 
 As mentioned in the discussion on callback style, errors are generally passed
 to callback functions in the style of node, as the first argument. Charlotte
@@ -1298,7 +1353,7 @@ Additional properties:
 
 Generated when an error occurs loading javascripts or stylesheets.
 
-## `completeBundleProcess`
+# `completeBundleProcess`
 
 Normally a server error will abort normal request processing and generate an
 `Error` that will be passed along the error handler chain. The server can
@@ -1320,9 +1375,9 @@ Guide](http://expressjs.com/guide.html#error-handling) by adding the
 `completeBundleProcess` flag. Here again we're leveraging code written to
 handle normal web requests by extending it to work in html bundle mode.
 
-## charlotte.util
+# charlotte.util
 
-### Utility methods
+## Utility methods
 
 * **propertyHelper()** - this method can be used to create request scope
   properties that can be set and accessed from templates. this allows a
@@ -1336,7 +1391,7 @@ handle normal web requests by extending it to work in html bundle mode.
 * **parseUrl(url)** - parses the *url* and returns an object with
   [attributes](http://dev.w3.org/html5/spec/urls.html#url-decomposition-idl-attributes).
 
-### semanticVersion(versionString)
+## semanticVersion(versionString)
 
 Parses a [semantic version](http://semver.org/) string and returns an object
 with these methods:
@@ -1350,7 +1405,7 @@ with these methods:
 * **isPatchOf(that)** - returns `true` if `this` is a patch of `that` (i.e.
   2.1.2 is a patch of 2.1.0 and 2.1.1, but not 2.0 or 2.1.3)
 
-### VersionMismatchError(localVersion, remoteVersion[, message]) 
+## VersionMismatchError(localVersion, remoteVersion[, message]) 
 
 Constructor for an `Error` representing a mismatch between the version
 retrieved from local storage and the version returned from the server. Has a
@@ -1360,7 +1415,7 @@ properties.
 Intended for use in `onVersionChange` handlers to be passed to the error
 callback chain.
 
-## charlotte.pagetransitions
+# charlotte.pagetransitions
 
 To get started with your app, you can use some of the basic animations
 provided in this module in your page transition functions. You'll probably
