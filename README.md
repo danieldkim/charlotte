@@ -902,8 +902,8 @@ plus:
 
 * **viewOnly** - whether this is a view-only request
 
-* **container** - the DOM container into which the page should be loaded; can
-  be CSS selector or actual element object.
+* **container** - the DOM container into which the generated HTML should be added; can
+  be CSS selector or actual element object.  optional.
 
 * **followRedirects** - override of the browser option with the same name.
 
@@ -934,7 +934,8 @@ The `callback` is invoked when the request is complete and has this signature:
 
 * **bundle** - the [html bundle][html_bundles] object. 
 
-* **html** - the html content that was loaded into the specified container.
+* **html** - the generated html content; the same content that was loaded into
+  the specified container, if specified.
 
 * **triggerReady** - a function to call to trigger the `ready` event on the
   page. ready event handlers will not be executed until this function is
