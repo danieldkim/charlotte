@@ -773,19 +773,21 @@ The different cachedBundles options are:
 Error handler callbacks to be invoked when an error occurs while processing a
 `request()` or `tab.load()`.
 
-`global: function(err, tab)`
+`global: function(err, page)`
 
-The global error handler *always* gets invoked for every error. Logging the
-error somewhere is something you may want to do in a global error handler.
+The global error handler *always* gets invoked for every error. The `page`
+argument is the page that the error occurred on if it was a `tab.load()` call.
+Logging the error somewhere is something you may want to do in a global error
+handler.
 
-`default: function(err, tab, next)`
+`default: function(err, page, next)`
 
 This is the default error handler for any `request()` calls or `tab.load()`
 calls that do not specify an `onError` option. The `next` argument is a
 callback that you should invoke if you'd like to continue processing and for
 the error to be passed on to the request/load callback.
 
-### onCacheMiss(url, tab, afterViewLoad)
+### onCacheMiss(url, page, afterViewLoad)
 
 Callback that is invoked if the network is accessed at any point while
 processing a `request()` or `tab.load()` call. Only invoked once per
@@ -794,14 +796,15 @@ request/load even if multiple network accesses occur.
 The `url` argument is of the *actual* resource on which the first cache miss
 occurred while processing the request, i.e. potentially a JavaScript file that
 has to be downloaded if the html bundle was retrieved from the cache. Thus,
-the url may not be the same as the url of the page that was being loaded.
+the url may not be the same as the url of the `page` that was being loaded if
+the cache miss occurred during a `tab.load()` call.
 
 The `afterViewLoad` argument indicates whether this cache miss occurred on a
 view-only load after the view has been completely loaded.
 
 This callback will *not* be invoked if overridden at the request/load level.
 
-### onRequestEnd(settings, tab)
+### onRequestEnd(settings, page)
 
 Callback that is invoked when any `request()` (which is also used internally
 by `tab.load()`) is fully processed. One use case for this is to hide a
@@ -1277,11 +1280,11 @@ The chain for a `tab.load()` call is slightly different and looks like this:
 
 Both start with the `global` handler specified in the `createBrowser()` options:
 
-`function(err, tab)`
+`function(err, page)`
 
 * **err** - the error.
 
-* **tab** - the tab the error occurred in if it occurred on a tab load.
+* **page** - the page the error occurred on if it occurred on a page load.
 
 The global handler is always invoked for every error that occurs on a browser
 request or tab load, and is the first to be invoked. The next error handler in
@@ -1290,7 +1293,7 @@ callback is passed to it.
 
 Next in line is the default error handler:
 
-`function(err, tab, next)`
+`function(err, page, next)`
 
 It takes the same arguments as the global handler plus a callback that can be
 optionally invoked to pass the error down to the next handler in the chain.
