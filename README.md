@@ -1080,6 +1080,10 @@ Default transition functions can be defined at the browser level (see
 here. Setting a transition option to `null` will nullify for this load any
 default transition option set at the browser level.
 
+The value of `this` in the transition function is the current page *before*
+the transition to the new page (or to the previous page in the case of
+`onBack`)
+
 ### <a id="view-only-first-loads"></a>View-only first loads
 
 Responsive user interfaces require that some sort of view be displayed to the
