@@ -932,6 +932,10 @@ plus:
 
 * **archiver** - same as the browser option with the same name; will be called
   before the browser callback.
+ 
+* **renderHtml** - boolean indicating whether template+bundle should be
+  rendered into HTML. defaults to `true`. use this to avoid the cost of
+  rendering the HTML if you're only interested in the bundle.
 
 The `callback` is invoked when the request is complete and has this signature:
 
