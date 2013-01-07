@@ -296,6 +296,20 @@ Do not use the `img` helper to include non-application-asset images such as
 user-generated content. Should only be used for images that are part of the
 application itself, i.e. icons.
 
+### assetUrl(url)
+
+Sometimes you want to output an asset url in your markup outside of a script,
+link, or img tag (e.g. as a `background-image` property in an inline style).
+
+this (jade):
+  
+    div(style="background-image: url('#{assetUrl("/img/foo.jpg")}')")
+  
+will output this:
+
+    <div style="background-image: url('http://assets.local.host:3000/versions/1.0/img/foo.jpg')"></div>
+
+
 ## Utility Helpers
 
 * isBlank(varName) - returns `true` is the variable named `varName` in `this`
