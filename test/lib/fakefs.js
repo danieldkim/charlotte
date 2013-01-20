@@ -113,7 +113,12 @@
       name: name,
       isDirectory: !isFile,
       isFile: isFile,
-      getEntry: getEntry
+      getEntry: getEntry,
+      file: function(successCallback, errorCallback) {
+        successCallback({
+          size: entry.data ? entry.data.length : undefined
+        });
+      }
     };
     
     if (isFile) {
