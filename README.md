@@ -508,23 +508,18 @@ to select the root for event delegation:
 
 Charlotte provides a couple of convenience methods on the execution context --
 `on()` and `find()` -- that are automatically scoped to the context's
-container. Pages also have an `isAPage` property set to `true`. Using
-`isAPage` and `on()`, the above can be written like so:
+container. Using `on()`, the above can be written like so:
 
     function(callback) {
       var self = this;
 
-      if (self.isAPage) {
+      this.on('click', '#nav-bar .button.left', function(e) {
+        e.preventDefault();
+        self.back();
+      });
 
-        self.on('click', '#nav-bar .button.left', function(e) {
-          e.preventDefault();
-          self.back();
-        });
-
-      }
       callback();
     }
-
 
 Charlotte will detach all event handlers from a page's container when `back()`
 is called, to prevent any possible memory leaks.
