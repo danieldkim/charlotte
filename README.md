@@ -695,6 +695,9 @@ methods:
   `clearFileCache()`. this method is mainly used internally to clear the RAM
   cache when a version change is detected.
 
+* `getVersionKey()` - returns the key used to access/store the current version
+  in `localStorage`.  is based on the `rootUrl`.
+
 
 # browser
 
@@ -970,6 +973,11 @@ is given a callback to invoke when you're ready to render. (`tab.load()` uses
 this internally to delay the rendering of the full page on view-only-first
 loads until the view-only load, including transition and ready event handlers,
 has completed processing.)
+
+## getVersionKey()
+
+Returns the key used by this browser instance to access/store the current
+version in `localStorage`.  Is based on the `rootUrl`.
 
 # tab
 
@@ -1704,7 +1712,8 @@ app distribution. This can allow the app to function even if started for the
 first time when offline. In fact, you **should** put at a bare minimum enough
 in the cache seed to at least display the view-only version of the home page
 and a user friendly message if the server is unreachable when the app is
-initially booted.
+initially booted. You'll probably want to put more than the bare minimum to
+minimize the time it takes to initially boot the app even when online.
 
 The default cache seed location is `./cache_seed`, which would be
 `www/cache_seed` in your PhoneGap app. 
@@ -1717,6 +1726,29 @@ iOS simulator with versioning/caching enabled, hitting the pages that you want
 to be bundled with the app. Then copy the relevant directories and files over
 to the cache seed location.
 
+### Initialize the version in `localStorage`
+
+Charlotte uses a `localStorage` item to keep track of the current version of
+the app. When the app is booted for the first time after initial installation
+this value will not exist in `localStorage`. Charlotte will attempt to
+retrieve the current version from the server in this case. If the app is
+offline when initially booted, however, it will have no way of determining the
+current version and will thus use non-versioned asset urls -- and thus will
+not find the assets you've shipped in the cache seed.
+
+To prevent this, simply do something like this in your app boot script before
+you do anything else with charlotte:
+
+    charlotte.rootUrl = 'http://foo.com';
+    // versionKey is based on rootUrl
+    var versionKey = charlotte.getVersionKey();
+    if (!localStorage.getItem(versionKey)) {
+      localStorage.setItem(versionKey, "1.0");
+    }
+
+You'll have to do the same for any browser instances that you create on boot
+that have a different `rootUrl` than the global `charlotte` object.
+
 ### Binary files in the cache seed
 
 One caveat for binary files is that they must be specified in a manifest. This
@@ -1724,13 +1756,12 @@ is because there is currently no way to transfer/copy binary files from the
 app bundle to the cache location.
 
 For example, if you have a file that gets stored in the cache location at
-`/res_cache/foo.com/1.0/assets.foo.com/versions/1.0/img/icons/bar.png` you should
-set the `cacheSeedBinaryFiles` option on charlotte like so:
+`/res_cache/foo.com/1.0/assets.foo.com/versions/1.0/img/icons/bar.png` you
+should set the `cacheSeedBinaryFiles` option on charlotte like so:
 
     charlotte.cacheSeedBinaryFiles = [
       '/res_cache/foo.com/1.0/assets.foo.com/versions/1.0/img/icons/bar.png'
     ];
-    
 
 I know this solution is less than ideal but, until I have time to work on a
 better one, it works.
