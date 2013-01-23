@@ -658,6 +658,9 @@ methods:
   location and will be resolved relative to the `www` directory in the native
   app. defaults to `'./cache_seed'`.
 
+* **cacheSeedBinaryFiles** - a list of paths of all the binary files in the
+  cache seed, root-relative to the `cacheSeedLocation`.
+
 * **readyRegistryTimeToLive** - how long ready event handlers should live
   before being purged, in milliseconds.  defaults to 15000.
 
@@ -1706,11 +1709,31 @@ initially booted.
 The default cache seed location is `./cache_seed`, which would be
 `www/cache_seed` in your PhoneGap app. 
 
-The structure of the cache seed mirrors that of the filesystem cache. To
-determine exactly what content to put into your cache seed, you can simply run
-your app in the iOS simulator with versioning/caching enabled, hitting the
-pages that you want to be available on initial boot even if offline. Then copy
-the relevant directories and files over to the cache seed location.
+The structure of the cache seed mirrors that of the filesystem cache (it
+should contain the same top-level directory for all the cached assets, which
+in the current version of charlotte is `/res_cache`). To determine exactly
+what content to put into your cache seed, you can simply run your app in the
+iOS simulator with versioning/caching enabled, hitting the pages that you want
+to be bundled with the app. Then copy the relevant directories and files over
+to the cache seed location.
+
+### Binary files in the cache seed
+
+One caveat for binary files is that they must be specified in a manifest. This
+is because there is currently no way to transfer/copy binary files from the
+app bundle to the cache location.
+
+For example, if you have a file that gets stored in the cache location at
+`/res_cache/foo.com/1.0/assets.foo.com/versions/1.0/img/icons/bar.png` you should
+set the `cacheSeedBinaryFiles` option on charlotte like so:
+
+    charlotte.cacheSeedBinaryFiles = [
+      '/res_cache/foo.com/1.0/assets.foo.com/versions/1.0/img/icons/bar.png'
+    ];
+    
+
+I know this solution is less than ideal but, until I have time to work on a
+better one, it works.
 
 # Some general guidelines
 
