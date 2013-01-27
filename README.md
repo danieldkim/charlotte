@@ -1226,7 +1226,8 @@ transitions.
 
 ## reload(callback)
 
-Reloads the current page in the tab.
+Reloads the current page in the tab. `callback` is invoked when reload is
+complete.
 
 ## back(options[, callback])
 
@@ -1287,8 +1288,8 @@ These methods delegate to the containing tab.
 If you want a page to do something different when it's reloaded you can
 override the default behavior in your ready event handler or onLoad callback:
 
-    this.reload = function() {
-      refreshSomeContent();
+    this.reload = function(callback) {
+      refreshSomeContent(callback);
     }
 
 ## tab
