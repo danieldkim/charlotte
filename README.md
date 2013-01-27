@@ -1185,7 +1185,7 @@ status and setting a `Location` header will bypass this magic. (Note: for
 non-html-bundle requests `res.redirect()` will continue to do the normal thing
 and send a `302` with a `Location` header)
 
-### Posts
+### <a id="posts"></a>Posts
 
 The `tab.load()` method also has some special handling for posts.
 
@@ -1224,10 +1224,12 @@ restore scrollTops on staged content containers when transitioning them in.
 Have a look there for an example of how to use this data in your own
 transitions.
 
-## reload(callback)
+## reload(callback[, isRedirectFromPost])
 
 Reloads the current page in the tab. `callback` is invoked when reload is
-complete.
+complete. The `isRedirectFromPost` argument is used by charlotte when it
+[auto-reloads a page when posting](#posts) and should not be sent by external
+callers.
 
 ## back(options[, callback])
 
@@ -1288,9 +1290,25 @@ These methods delegate to the containing tab.
 If you want a page to do something different when it's reloaded you can
 override the default behavior in your ready event handler or onLoad callback:
 
-    this.reload = function(callback) {
-      refreshSomeContent(callback);
+    this.reload = function(callback, isRedirectFromPost) {
+      async.parallel([
+        function(callback) {
+          if (isRedirectFromPost) {
+            refreshStatusMessage(callback);
+          } else {
+            callback();
+          }
+        },
+        
+        function(callback) {
+          refreshSomeContent(callback);
+        }
+      ], callback);
     }
+    
+
+Charlotte will send a `true` value for the `isRedirectFromPost` argument when
+it [auto-reloads a page when posting](#posts).
 
 ## tab
  
