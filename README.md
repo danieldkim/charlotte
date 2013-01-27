@@ -1282,7 +1282,14 @@ Self-explanatory.  Always `true`.
 
 ## `load()`, `reload()`, and `back()`
 
-These methods delegate to the containing tab.
+These methods delegate to the containing tab. 
+
+If you want a page to do something different when it's reloaded you can
+override the default behavior in your ready event handler or onLoad callback:
+
+    this.reload = function() {
+      refreshSomeContent();
+    }
 
 ## tab
  
