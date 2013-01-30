@@ -1259,6 +1259,10 @@ Returns the current page in this tab.
 
 Returns the previous page in this tab.
 
+## clear()
+
+Clears all pages from this tab.
+
 # page
 
 A page is a basically an extension of the settings object that zepto’s ajax()
