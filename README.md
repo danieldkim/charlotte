@@ -913,6 +913,10 @@ Returns the currently selected tab.
 
 Switches to the tab with the give `name`.
 
+## getTab(name)
+
+Returns the tab with the give `name`.
+
 ## <a id="request"></a>request(settings, callback[, renderWait])
 
 Issues an [html bundle][html_bundles] request.
