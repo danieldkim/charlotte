@@ -1045,6 +1045,10 @@ settings object that zepto's `ajax()` accepts plus:
 * **onDestroy** - supplemental to the tab and browser options with the same
   name, will be called before them.
 
+* **preserveOnViewLoadOnRedirect** - whether to preserve the `onViewLoad`
+  option if redirected to another page. defaults to `true`. set to `false` if
+  you want to disable `viewOnly` loads on redirect.
+
 `onViewLoad`, `onLoad`, and `onBack` all take the same options, both of
 which are optional:
 
