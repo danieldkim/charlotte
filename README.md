@@ -1322,6 +1322,29 @@ override the default behavior in your ready event handler or onLoad callback:
 Charlotte will send a `true` value for the `isRedirectFromPost` argument when
 it [auto-reloads a page when posting](#posts).
 
+## isLoading
+
+Whether the page is currently being loaded; is `true` until the last ready
+event handler in the ready event handler chain has been executed. This can be
+useful in your DOM event handlers if you only want them to do anything once
+the page is fully loaded. For example, you may have an event handler that
+applies styling to a back button when it's tapped but if you invoke `back()`
+on a page while it is still loading it will be ignored, leaving the styling in
+place on the button but the page not popped. You can check `page.isLoading` before
+applying the styling:
+
+    page.on('touchstart', '.button.back', function(e) {
+      if (!page.isLoading) {
+        $(this).addClass('tapped');
+      }
+    });
+
+
+This is a new property that probably makes more sense to keep transparent --
+i.e., if you use `page.on()` to attach your event handlers it will
+transparently ignore or block events until the page is fully loaded. May do
+that in the future but for now you have this property to use if you need it.
+
 ## tab
  
 The tab that this page was loaded into.
