@@ -1063,7 +1063,6 @@ The signature for the `onViewLoad` and `onLoad` callbacks looks like:
 `function(err, bundle, next[, afterViewLoad])`
 
 * **err** - an error object if an error occurred while processing the load.
-  any errors passed to ready event handler callbacks will end up here, too.
 
 * **bundle** - html bundle response.
 
