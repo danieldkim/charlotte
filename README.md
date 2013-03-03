@@ -917,7 +917,7 @@ Switches to the tab with the give `name`.
 
 Returns the tab with the give `name`.
 
-## <a id="request"></a>request(settings, callback[, renderWait])
+## <a id="request"></a>request(settings, callback[, renderWait, page])
 
 Issues an [html bundle][html_bundles] request.
 
@@ -977,6 +977,10 @@ is given a callback to invoke when you're ready to render. (`tab.load()` uses
 this internally to delay the rendering of the full page on view-only-first
 loads until the view-only load, including transition and ready event handlers,
 has completed processing.)
+
+An optional `page` argument can be passed which will be used as the context
+for any ready event handlers that are executed. You should probably pass this
+if you intend to invoke the `triggerReady` function.
 
 ## getVersionKey()
 
