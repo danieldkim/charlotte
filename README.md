@@ -1075,7 +1075,8 @@ The signature for the `onViewLoad` and `onLoad` callbacks looks like:
   the load()-level is always the last in the chain, if it exists -- can also
   pass a callback to this function to be invoked after the execution of the
   ready event handler chain is complete, though you will rarely need to do
-  this.
+  this. if you omit this argument in your callback signature, the next
+  callback in the chain will be called immediately after.
 
 * **afterViewLoad** - only relevant for `onLoad()`, this is `true` when the
   load event occurred after a view load.
