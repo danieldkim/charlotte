@@ -821,7 +821,7 @@ view-only load after the view has been completely loaded.
 
 This callback will *not* be invoked if overridden at the request/load level.
 
-### onRequestEnd(settings, page)
+### onRequestEnd(settings, page, bundle)
 
 Callback that is invoked when any `request()` (which is also used internally
 by `tab.load()`) is fully processed. One use case for this is to hide a
