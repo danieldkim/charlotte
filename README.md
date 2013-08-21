@@ -1282,9 +1282,9 @@ accepts. The page object includes all of the properties passed in the `load()`
 call (such as `url`, `type`, etc.). In addition to those properties and the
 common charlotte properties, a charlotte page has the properties below.
 
-It's worth noting here that one property in particular that can be useful to
-**set** from your within your `ready()` event handler code is the `archiver`
-property.
+It's worth noting here properties in particular that maybe be useful to **set**
+from your within your `ready()` event handler code include the `archiver`,
+`onBack`, and `onDestroy` properties.
 
 ## index
 
