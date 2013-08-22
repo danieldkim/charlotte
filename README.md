@@ -1286,6 +1286,11 @@ It's worth noting here properties in particular that maybe be useful to **set**
 from your within your `ready()` event handler code include the `archiver`,
 `onBack`, and `onDestroy` properties.
 
+## NODE_ENV
+
+The value of the `NODE_ENV` environment variable (e.g., development, production,
+etc.)
+
 ## index
 
 The index of this page in the tab history. Can be useful in your view template
