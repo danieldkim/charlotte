@@ -690,6 +690,21 @@ methods:
   * **versionExceptions** - an array of version strings that should be
     *not* be cleared.
 
+* `removeFromFileCache(paths, callback)` - removes only certain files from the
+  file cache.  pass an array of file paths in the `paths` argument.  use the
+  path that is logged to the console when a file is downloaded (look for log
+  lines that say "Downloaded file: /path/to/myfile.js").  you can also see the
+  full path to a file through different simulator/device-specific means.  for
+  instance you can use the XCode Organizer to browse the filesystem for an app
+  installed on an iphone (the full path to the file would include every
+  component of the path under the Documents directory).  this function is useful
+  when debugging on a device and versioning is on.  you can make changes to just
+  a few files on the server, delete them from the file cache, restart your app, 
+  and charlotte will download the missing files (for changes that are confined 
+  to templates and for purely additive css changes it should be sufficient to
+  clear the RAM cache and reload the page vs. restarting the app entirely).
+
+
 * `clearRamCache(options)` - clears the RAM cache for a particular `rootUrl`
   (including the temp cache). options are the same as those for
   `clearFileCache()`. this method is mainly used internally to clear the RAM
