@@ -1002,6 +1002,19 @@ if you intend to invoke the `triggerReady` function.
 Returns the key used by this browser instance to access/store the current
 version in `localStorage`.  Is based on the `rootUrl`.
 
+## getAssetFileUrl(version, url)
+
+Returns the URL for the asset in the filesystem cache.  You generally don't need
+to worry about this but there are some edge cases where the abstraction leaks
+and this method comes in handy, i.e. you want to set the background image for an
+element dynamically to an image asset:
+
+      var backgroundImageUrl = '/img/my-background.jpg';
+      if (charlotte.inNativeApp) {
+        backgroundImageUrl = browser.getAssetFileUrl(page.version, backgroundImageUrl);
+      }
+      page.find('#my-element').css('background-image', "url('" + backgroundImageUrl + "')");
+
 # tab
 
 In addition to the common ones, a charlotte tab has the following properties.
@@ -1304,7 +1317,11 @@ from your within your `ready()` event handler code include the `archiver`,
 ## NODE_ENV
 
 The value of the `NODE_ENV` environment variable (e.g., development, production,
-etc.)
+etc.) on the server.
+
+## version
+
+The version returned by the request that this page is associated with.
 
 ## index
 
