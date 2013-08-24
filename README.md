@@ -1015,6 +1015,12 @@ element dynamically to an image asset:
       }
       page.find('#my-element').css('background-image', "url('" + backgroundImageUrl + "')");
 
+## loadTemplates(version, paths, callback)
+
+Loads templates specified in the `path` argument into the cache(s).  **Note:** 
+this method is **not** smart about loading referenced partials.  You must
+explicitly specify all templates that you want to load.
+
 # tab
 
 In addition to the common ones, a charlotte tab has the following properties.
