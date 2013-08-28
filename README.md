@@ -1002,17 +1002,15 @@ if you intend to invoke the `triggerReady` function.
 Returns the key used by this browser instance to access/store the current
 version in `localStorage`.  Is based on the `rootUrl`.
 
-## getAssetFileUrl(version, url)
+## getAssetUrl(version, url)
 
-Returns the URL for the asset in the filesystem cache.  You generally don't need
-to worry about this but there are some edge cases where the abstraction leaks
-and this method comes in handy, i.e. you want to set the background image for an
-element dynamically to an image asset:
+Returns the versioned URL for the asset.  Returns the URL for the asset in the
+filesystem cache when `charlotte.inNativeApp` is `true`.  You generally don't
+need to worry about this but there are some edge cases where the abstraction
+leaks and this method comes in handy, i.e. you want to set the background image
+for an element dynamically to an image asset:
 
-      var backgroundImageUrl = '/img/my-background.jpg';
-      if (charlotte.inNativeApp) {
-        backgroundImageUrl = browser.getAssetFileUrl(page.version, backgroundImageUrl);
-      }
+      var backgroundImageUrl = browser.getAssetUrl(page.version, '/img/my-background.jpg');
       page.find('#my-element').css('background-image', "url('" + backgroundImageUrl + "')");
 
 ## loadTemplates(version, paths, callback)
