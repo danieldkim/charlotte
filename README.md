@@ -1019,6 +1019,20 @@ Loads templates specified in the `path` argument into the cache(s).  **Note:**
 this method is **not** smart about loading referenced partials.  You must
 explicitly specify all templates that you want to load.
 
+## getTemplate(version, path)
+
+Sometimes you just want that template so you can render some html manually:
+
+    tmpl = browser.getTemplate(page.version, "/comments/comment.jade");
+    locals = _.extend({
+      comment: {
+        user: currentUser,
+        text: text,
+        createdAt: Date.now()
+      }, browser.helpers);
+    page.find('#comments-list').prepend(tmpl(locals)); 
+
+
 # tab
 
 In addition to the common ones, a charlotte tab has the following properties.
