@@ -1321,6 +1321,11 @@ Returns the previous page in this tab.
 
 Clears all pages from this tab.
 
+## loadInProgress()
+
+Returns a boolean indicating whether a page load is currently in progress on
+this.
+
 # page
 
 A page is a basically an extension of the settings object that zepto’s ajax()
