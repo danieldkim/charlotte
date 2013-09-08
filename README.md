@@ -266,6 +266,11 @@ bundle*][html_bundles] mode on the client there's a bit more going on.
 this:
 
     != javascripts('/js/underscore', '/js/async')
+
+or this:
+
+    != javascripts(['/js/underscore', '/js/async'])
+
 will output this:
 
     <script type="text/javascript" src="http://assets.local.host:3000/versions/1.0/js/underscore.js"></script>
@@ -277,6 +282,11 @@ will output this:
 this:
 
     != stylesheets('/css/foo', '/foo/bar')
+
+or this:
+
+    != stylesheets(['/css/foo', '/foo/bar'])
+
 will output this:
 
     <link rel="stylesheet" type="text/css" href="http://assets.local.host:3000/versions/1.0/css/foo.css"></link>
@@ -343,6 +353,7 @@ will output this:
 * inNativeApp - this tells the template if it's running within a native app
   and device APIs are available.
 
+* requestIsSecure - whether the current request is an https request.
 
 # Client `window` API
 
@@ -1927,6 +1938,19 @@ better one, it works.
   created. this fits with the general use case for the `flash()` method; your
   app should not depend on support for other use cases.
 
+# SSL support
+
+There is some support for handling SSL transparently in the server while
+specifying a non-SSL `rootUrl` and `assetRootUrl` option for charlotte.  When
+executing on the server the helpers will output URL's appropriately depending on
+whether the current request is https or not.
+
+On the client, you need to take care of setting up the charlotte object with the
+appropriate `rootUrl` and `assetRootUrl`, https or not.  Mixing http and http
+requests in an HTML bundle mode session is not supported yet, though some
+preliminary work has been done to support it.  All requests will be either/or --
+`requestIsSecure` will be a constant value for every HTML bundle request within
+a given session.
 
 
 [demo]: https://github.com/danieldkim/charlotte_demo  "Charlotte demo"
