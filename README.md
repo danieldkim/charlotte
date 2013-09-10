@@ -1586,7 +1586,17 @@ handle normal web requests by extending it to work in html bundle mode.
 ## semanticVersion(versionString)
 
 Parses a [semantic version](http://semver.org/) string and returns an object
-with these methods:
+with these properties and methods:
+
+* **major** - the major version
+
+* **major** - the minor version
+
+* **major** - the patch version
+
+* **preRelease**  - the pre-release identifier
+
+* **build** - the build metadata
 
 * **toString()** - returns the string representation of the version.
 
@@ -1594,8 +1604,16 @@ with these methods:
   `this` is less than `that`, 0 if they're equal, and 1 if `this` is greater
   than `that`.
 
+* **depthEqualTo(that)** - the depth to which `this` is equal to `that`. "1.0.1"
+  is equal to "1.0.2" to a depth of 2 but only equal to "1.1.0" to a depth of 1.
+  **note: "1.0" is equal to "1.0.0" to a depth of 3.  and "1.0.0+1" is equal
+  to "1.0.0+1" to depth of 5.**
+
 * **isPatchOf(that)** - returns `true` if `this` is a patch of `that` (i.e.
   2.1.2 is a patch of 2.1.0 and 2.1.1, but not 2.0 or 2.1.3)
+
+* **isBuildUpdateOf(that)** returns `true` if this is a later build of the same
+  release or pre-release version.
 
 ## VersionMismatchError(localVersion, remoteVersion[, message]) 
 
