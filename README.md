@@ -1583,6 +1583,15 @@ handle normal web requests by extending it to work in html bundle mode.
 * **parseUrl(url)** - parses the *url* and returns an object with
   [attributes](http://dev.w3.org/html5/spec/urls.html#url-decomposition-idl-attributes).
 
+* **parseBundle(url)** - parses an HTML bundle, automatically converting
+  UTC-formatted date strings into Date objects.
+
+* **storeScrollPositions(contentContainer)** - store positions of scrolled
+  elements in a way that can be restored by `restoreScrollPositions()`.
+
+* **restoreScrollPositions(contentContainer)** - restore positions of scrolled
+  elements that were stored by `storeScrollPositions()`.
+
 ## semanticVersion(versionString)
 
 Parses a [semantic version](http://semver.org/) string and returns an object
