@@ -1586,8 +1586,9 @@ handle normal web requests by extending it to work in html bundle mode.
 * **parseBundle(url)** - parses an HTML bundle, automatically converting
   UTC-formatted date strings into Date objects.
 
-* **storeScrollPositions(contentContainer)** - store positions of scrolled
-  elements in a way that can be restored by `restoreScrollPositions()`.
+* **storeScrollPositions(contentContainer, tabContainer)** - store positions of
+  scrolled elements in a way that can be restored by `restoreScrollPositions()`.
+  `tabContainer` should be a selector.
 
 * **restoreScrollPositions(contentContainer)** - restore positions of scrolled
   elements that were stored by `storeScrollPositions()`.
