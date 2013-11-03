@@ -570,6 +570,74 @@ It is theoretically possible, however, to have multiple browsers in an app
 with different bases/roots, or tabs within a browser that have different
 bases/roots.
 
+### <a id="before-ajax"></a>beforeAjax(url, settings, callback)
+
+Charlotte provides a way for you to intercept calls to its low-level internal
+AJAX API and modify the arguments passed to if desired.  This can be done at the
+charlotte, browser, and tab levels by setting the `beforeAjax`callback at that
+level.  If set at multiple levels their invocations will be chained starting at
+the most specific level, the result of the previous level being passed up the
+chain.  These callbacks will be executed whenever Charlotte makes an AJAX
+request internally to do its work (including when downloading templates and when
+loading assets from the [cache seed](#cache-seed)).
+
+The arguments to `beforeAjax` are
+
+* **url** - the url of the request
+
+* **settings** - the settings object that will be passed to zepto
+
+* **callback(err[, url[, settings]])** - a callback to invoke when you're done
+  to invoke the next function in the chain.  if `url` and/or `settings`
+  arguments are passed they will passed to the next function instead of the
+  arguments received by this function.
+
+An example is illustrative.  This is a `beforeAjax` callback that I use to route
+requests to a special "review" server where I deploy the upcoming 
+not-yet-approved version of my app while the app is being reviewed in the app
+store:
+
+    if (charlotte.inNativeApp) {
+      charlotte.beforeAjax = function(url, settings, callback) {
+        var  version,
+             _this = this;
+        function rewriteUrl() {
+          return url.replace(/^http(s?):\/\/(assets\.)?(\w+)\.myapp\.com/, 
+                             'http$1://review.$2$3.myapp.com');
+        };
+        if ((settings && settings.bypassInReviewCheck) || !url.match(/^http/)) {
+          callback();
+        } else if (this.inReview) {
+          callback(null, rewriteUrl(), settings);
+        } else {
+          version = localStorage.getItem(this.getVersionKey());
+          // the assets for this version will not get deployed into real production
+          // environment until after the app is approved.  its absence means the
+          // app is still in review and we rewrite the url to route requests 
+          // to review server.  otherwise, app is approved, this version has been
+          // deployed into real production environment, this app was downloaded
+          // from the app store, and we can remove this beforeAjax callback.
+          this.ajax({
+            url: this.assetRootUrl + "versions/" + version + "/ping.js",
+            bypassInReviewCheck: true
+          }, function(err, data) {
+            if (err) {
+              if (err instanceof charlotte.ResourceNotFoundError) {
+                _this.inReview = true;
+                callback(null, rewriteUrl(), settings);
+              } else {
+                callback(err);
+              }
+            } else {
+              delete _this.beforeAjax; // no need for me anymore
+              callback();
+            }
+          });
+        }
+      };
+    }
+
+
 ## Common methods
 
 ### Asset methods
@@ -656,6 +724,17 @@ argument. The code below is equivalent to the above:
 
 * `on(type, [selector], handler)` - executes a Zepto `on()` on the content
   container for this context .
+
+### ajax(settings, callback)
+
+The charlotte, browser, and tab objects have an `ajax` method that you can use
+which is a thin wrapper around zepto's ajax method, with a node-style callback
+interface, relative url resolution, generation of charlotte 
+[error types](#error-types), and execution of [beforeAjax](#before-ajax)
+callbacks.
+
+It's generally recommended that you use this method if you need to issue manual
+AJAX requests.
 
 # charlotte
 
@@ -1473,7 +1552,7 @@ Finally, if the `next` callback is invoked in the default or settings.onError
 handler, the request-level callback will be invoked and passed the error as
 the first argument.
 
-## Error Types
+## <a id="error-types"></a>Error Types
 
 Charlotte will generate the errors of the types below to handle certain
 internal exceptions encountered while processing a request. You can check for
@@ -1863,7 +1942,7 @@ server version is completely deployed across all nodes you can delete the
 previous version.
 
 
-## Cache Seed
+## <a id="cache-seed"></a>Cache Seed
 
 If Charlotte cannot find a resource in the memory or in the filesystem cache,
 it will look in the cache seed location before requesting the resource from
