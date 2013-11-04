@@ -355,6 +355,14 @@ will output this:
 
 * requestIsSecure - whether the current request is an https request.
 
+# Express Request Helpers
+
+* acceptsHtmlBundle - whether the request is an [html bundle][html_bundles]
+  request.
+  
+* referer - a property that returns what the name implies.  works in [html
+  bundle][html_bundles] mode and normal request mode.
+
 # Client `window` API
 
 The client side of the charlotte framework runs within the `window` of a web
