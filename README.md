@@ -735,8 +735,8 @@ argument. The code below is equivalent to the above:
 
 ### ajax(settings, callback)
 
-The charlotte, browser, and tab objects have an `ajax` method that you can use
-which is a thin wrapper around zepto's ajax method, with a node-style callback
+The charlotte and browser objects have an `ajax` method that you can use which
+is a thin wrapper around zepto's ajax method, with a node-style callback
 interface, relative url resolution, generation of charlotte 
 [error types](#error-types), and execution of [beforeAjax](#before-ajax)
 callbacks.
