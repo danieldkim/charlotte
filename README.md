@@ -600,51 +600,46 @@ The arguments to `beforeAjax` are
   arguments are passed they will passed to the next function instead of the
   arguments received by this function.
 
-An example is illustrative.  This is a `beforeAjax` callback that I use to route
-requests to a special "review" server where I deploy the upcoming 
-not-yet-approved version of my app while the app is being reviewed in the app
-store:
+An example is illustrative.  Below is a simplified version of a `beforeAjax`
+callback that I use in an app to send an `X-next-version` header so that it can
+be used by proxy servers to route the request to node processes running the next
+version of the code while the app is in review:
 
-    if (charlotte.inNativeApp) {
-      charlotte.beforeAjax = function(url, settings, callback) {
-        var  version,
-             _this = this;
-        function rewriteUrl() {
-          return url.replace(/^http(s?):\/\/(assets\.)?(\w+)\.myapp\.com/, 
-                             'http$1://review.$2$3.myapp.com');
-        };
-        if ((settings && settings.bypassInReviewCheck) || !url.match(/^http/)) {
-          callback();
-        } else if (this.inReview) {
-          callback(null, rewriteUrl(), settings);
-        } else {
-          version = localStorage.getItem(this.getVersionKey());
-          // the assets for this version will not get deployed into real production
-          // environment until after the app is approved.  its absence means the
-          // app is still in review and we rewrite the url to route requests 
-          // to review server.  otherwise, app is approved, this version has been
-          // deployed into real production environment, this app was downloaded
-          // from the app store, and we can remove this beforeAjax callback.
-          this.ajax({
-            url: this.assetRootUrl + "versions/" + version + "/ping.js",
-            bypassInReviewCheck: true
-          }, function(err, data) {
-            if (err) {
-              if (err instanceof charlotte.ResourceNotFoundError) {
-                _this.inReview = true;
-                callback(null, rewriteUrl(), settings);
-              } else {
-                callback(err);
-              }
-            } else {
-              delete _this.beforeAjax; // no need for me anymore
-              callback();
-            }
-          });
-        }
-      };
-    }
+    charlotte.beforeAjax = function(url, settings, callback) {
+      var version,
+        _this = this;
+      function addHeader() {
+        settings.headers = settings.headers || {}
+        settings.headers['X-next-version'] = 'yes';
+      }
+      if ((settings && settings.bypassInReviewCheck) || !url.match(/^http/)) {
+        callback();
+      } else if (this.inReview) {
+        addHeader();
+        callback(null, url, settings);
+      } else {
+        this.ajax({
+          url: this.rootUrl  + "version",
+          bypassInReviewCheck: true
+        }, function(err, data) {
+          if (err) {
+            callback(err);
+          } else if (data == window.bootConfigVersion) {
+            delete _this.beforeAjax;
+            callback();
+          } else {
+            _this.inReview = true;
+            addHeader();
+            callback(null, url, settings);
+          }
+        });
+      }
+    };
 
+The method above checks to see if the version the app is built as is equal to
+the currently deployed server version.  If so, it deletes itself.  Otherwise, it
+sets an `inReview` flag to `true` and adds the `X-next-version` header to the
+current and subsequent requests.
 
 ## Common methods
 
