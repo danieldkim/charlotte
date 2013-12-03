@@ -929,11 +929,17 @@ view-only load after the view has been completely loaded.
 
 This callback will *not* be invoked if overridden at the request/load level.
 
-### onRequestEnd(settings, page, bundle)
+### onRequestEnd(err, settings, page, bundle)
 
 Callback that is invoked when any `request()` (which is also used internally
 by `tab.load()`) is fully processed. One use case for this is to hide a
 "loading" status message that you displayed on cache miss.
+
+    onRequestEnd: function(err, settings, page, bundle) {
+      if (!(err instanceof charlotte.RedirectError)) {
+        hideLoadingMessage(page);
+      }
+    }
 
 This callback will *not* be invoked if overridden at the request/load level.
 
