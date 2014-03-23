@@ -1198,6 +1198,9 @@ settings object that zepto's `ajax()` accepts plus:
   option if redirected to another page. defaults to `true`. set to `false` if
   you want to disable `viewOnly` loads on redirect.
 
+* **replaceCurrent** - `boolean` indicating whether to replace the current
+  page on the top of the stack with the new page.
+
 `onViewLoad`, `onLoad`, and `onBack` all take the same options, both of
 which are optional:
 
