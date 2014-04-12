@@ -1015,6 +1015,38 @@ Options for any [tab load](#tab-load) that occurs in this browser. The
 executed first. The `transition` options are defaults that can be overridden
 at the tab or `load()` call level.
 
+### bundleResponders
+
+An array of bundle responder objects.  Bundle responders are useful when you
+want to render a page without having to hit the server. They're client-side
+objects that handle generating [html bundle][html_bundles] responses for
+requests.  You can think of them as controllers that live on the client.
+Bundle responders have two properties:
+
+* **matcher(url, parsedUrl)** - takes the url of the request in string and
+parsed form as arguments and returns a `boolean` indicating whether this
+responder should handle the request.
+
+* **responder(settings, callback)** - takes the settings passed to
+[`charlotte.request`](#request) (which could be a [page](#page)), and passes an
+[html bundle][html_bundles] or an error back to the callback.
+
+A trivial example of a bundle responder:
+
+    {
+      matcher: function(url, parsedUrl) {
+        return parsedUrl.path === '/foobar';
+      },
+      respond: function(settings, callback) {
+        return callback(null, {
+          template: 'foobar',
+          locals: {
+            title: "Foobar"
+          }
+        });
+      }
+    }
+
 ## createTab(options)
 
 The options to this method are discussed in detail in the tab API section.
@@ -1428,7 +1460,7 @@ Clears all pages from this tab.
 Returns a boolean indicating whether a page load is currently in progress on
 this.
 
-# page
+# <a id="page"></a>page
 
 A page is a basically an extension of the settings object that zepto’s ajax()
 accepts. The page object includes all of the properties passed in the `load()`
