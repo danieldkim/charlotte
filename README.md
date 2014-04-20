@@ -1423,7 +1423,7 @@ complete. The `isRedirectFromPost` argument is used by charlotte when it
 [auto-reloads a page when posting](#posts) and should not be sent by external
 callers.
 
-## back(options[, callback])
+## back([options, callback])
 
 Goes back in the tab history, causing the previous page in the tab history to
 be displayed. The current page will be popped from the stack and permanently
@@ -1441,7 +1441,7 @@ updates to a page's view when it is returned to from a page that might have
 updated relevant state.  **Note:** the `charlotte` property of the `options`
 argument is reserved for charlotte-specific options.
 
-## backTo(url, options[, callback])
+## backTo(url[, options, callback])
 
 Goes back in the tab history to the specified `url`.  Transitions between
 intermediate pages are skipped and the `onBack` transition of the currently
