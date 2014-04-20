@@ -1435,6 +1435,20 @@ complete the `callback` argument, if it exists, will be invoked. Any errors
 that occurred in the `transition` or `callback` options of the page will be
 passed to the `back()` callback.
 
+The `options` argument is meant to provide a way for a page to pass data to a
+previous page when it's popped.  Applications can use this to implement
+updates to a page's view when it is returned to from a page that might have
+updated relevant state.  **Note:** the `charlotte` property of the `options`
+argument is reserved for charlotte-specific options.
+
+## backTo(url, options[, callback])
+
+Goes back in the tab history to the specified `url`.  Transitions between
+intermediate pages are skipped and the `onBack` transition of the currently
+loaded page is applied when restoring the page with the given `url`.  The
+`onBack` callbacks for all intermediate pages, however, are called and the
+same `options` argument is passed to each of them.
+
 ## length()
 
 Returns the length of this tab's history.
@@ -1493,7 +1507,7 @@ is being loaded:
 
 Self-explanatory.  Always `true`.
 
-## `load()`, `reload()`, and `back()`
+## `load()`, `reload()`, `back()`, and `backTo()`
 
 These methods delegate to the containing tab. 
 
