@@ -797,6 +797,14 @@ methods:
   to templates and for purely additive css changes it should be sufficient to
   clear the RAM cache and reload the page vs. restarting the app entirely).
 
+* `addCompiledTemplates(version, templates)` - adds precompiled templates to
+  the resource cache.  `templates` is a hash of template functions keyed by
+  their full absolute url.  the functions can be in function or string form.
+
+* `setTemplatesJs(version, url, callback)` - uses the specified templates file
+  as input to the `addCompiledTemplates()` method.  `url` is a relative url that
+  will be auto-versioned; this method will look in the local asset cache and
+  cache seed before requesting it from the server.
 
 * `clearRamCache(options)` - clears the RAM cache for a particular `rootUrl`
   (including the temp cache). options are the same as those for
