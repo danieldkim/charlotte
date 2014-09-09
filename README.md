@@ -984,10 +984,10 @@ it:
 ### archiver[(tab, page)]
 
 A function that takes a tab and a page argument and that when invoked creates
-an object with `onArchive(contentCtr)` and `onRestore(contentCtr)` and
-`onRestoreAfterTransition(contentCtr)` methods (all optional). The relevant
-method will be called on the returned object whenever the given page is
-archived/restored.
+an object with `onArchive(contentCtr)` and `onRestore(contentCtr,
+backOptions)` and `onRestoreAfterTransition(contentCtr, backOptions)` methods
+(all optional). The relevant method will be called on the returned object
+whenever the given page is archived/restored.
 
 The archiver function itself will be invoked just before the page is archived.
 Optionally, it is simply an object with the relevant methods.
@@ -1008,7 +1008,7 @@ restored when the page is returned to.  For example:
             return this.src = TINY_GIF;
           });
         },
-        onRestore: function(contentCtr) {
+        onRestore: function(contentCtr, backOptions) {
           return $('img', contentCtr).each(function() {
             return this.src = this._src;
           });
