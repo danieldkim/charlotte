@@ -667,7 +667,8 @@ The options for each of these methods are:
   object itself.
 
 If the `version`, `rootUrl`, and `assetRootUrl` options are not provided, the
-properties of the execution context will be used.
+properties of the execution context will be used.  The urls of the source
+files are passed to the callback function.
 
 There's also a wrapper around these methods that can be used to load both
 stylesheets and JavaScripts at once:
@@ -695,7 +696,13 @@ plus:
 
 * **baseUrl** - used to resolve relative module names in the dependencies list
 
+* **urlsCallback** - a callback that will receive the urls of all the source
+  files
+
 Modules are defined using the `charlotte.define()` method.
+
+If you ever need to grab a module programmatically, you can use the
+`charlotte.resolveModule(name)` method.
 
 #### Ready event handler modules
 
