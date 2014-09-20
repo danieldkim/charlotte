@@ -758,9 +758,6 @@ methods:
   location and will be resolved relative to the `www` directory in the native
   app. defaults to `'./cache_seed'`.
 
-* **cacheSeedBinaryFiles** - a list of paths of all the binary files in the
-  cache seed, root-relative to the `cacheSeedLocation`.
-
 * **readyRegistryTimeToLive** - how long ready event handlers should live
   before being purged, in milliseconds.  defaults to 15000.
 
@@ -2064,23 +2061,6 @@ you do anything else with charlotte:
 
 You'll have to do the same for any browser instances that you create on boot
 that have a different `rootUrl` than the global `charlotte` object.
-
-### Binary files in the cache seed
-
-One caveat for binary files is that they must be specified in a manifest. This
-is because there is currently no way to transfer/copy binary files from the
-app bundle to the cache location.
-
-For example, if you have a file that gets stored in the cache location at
-`/res_cache/foo.com/1.0/assets.foo.com/versions/1.0/img/icons/bar.png` you
-should set the `cacheSeedBinaryFiles` option on charlotte like so:
-
-    charlotte.cacheSeedBinaryFiles = [
-      '/res_cache/foo.com/1.0/assets.foo.com/versions/1.0/img/icons/bar.png'
-    ];
-
-I know this solution is less than ideal but, until I have time to work on a
-better one, it works.
 
 # Some general guidelines
 
