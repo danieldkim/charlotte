@@ -651,10 +651,14 @@ All of the execution contexts have methods to dynamically load application asset
 
 * `javascripts(options, callback)` - load JavaScript files.
 
+* `assetUrls(options)` - returns versioned URLs.
+
 The options for each of these methods are: 
 
-* **urls** - an array of resource paths minus the filename extensions (i.e.
-  "/foo/bar", instead of "/foo/bar.js")
+* **urls** - an array of resource paths.  paths are minus the filename
+  extensions (i.e.   "/foo/bar", instead of "/foo/bar.js"); the exception to
+  this is the `assetUrls()` method which expects urls to include the
+  extension.
 
 * **version** - version of assets to load. relative resource paths will be
   versioned using this value (e.g. "/foo/bar" -> "/versions/1.0/foo/bar")
@@ -670,8 +674,8 @@ If the `version`, `rootUrl`, and `assetRootUrl` options are not provided, the
 properties of the execution context will be used.  The urls of the source
 files are passed to the callback function.
 
-There's also a wrapper around these methods that can be used to load both
-stylesheets and JavaScripts at once:
+There's also a wrapper around the `stylesheets` and `javascripts` methods that
+can be used to load both stylesheets and JavaScripts at once:
 
 * `assets(options, callback)` 
 
@@ -680,6 +684,13 @@ The two possible options are:
 * **javascripts** - options for the JavaScripts load
 
 * **stylesheets** - options for the stylesheets load
+
+`assetUrls` comes in handy when you want to set the background image for an
+element dynamically to an image asset:
+
+    var backgroundImageUrl = page.assetUrls(urls: ['/img/my-background.jpg'])[0];
+    page.find('#my-element').css('background-image', "url('" + backgroundImageUrl + "')");
+
 
 ### AMD
 
@@ -696,8 +707,10 @@ plus:
 
 * **baseUrl** - used to resolve relative module names in the dependencies list
 
-* **urlsCallback** - a callback that will receive the urls of all the source
-  files
+* **allDependenciesCallback** - a callback that will receive the names of all
+  the dependencies encountered while resolving the required dependencies,
+  including the required dependencies themselves and all modules in the
+  dependency trees of the required dependencies
 
 Modules are defined using the `charlotte.define()` method.
 
@@ -1144,17 +1157,6 @@ if you intend to invoke the `triggerReady` function.
 
 Returns the key used by this browser instance to access/store the current
 version in `localStorage`.  Is based on the `rootUrl`.
-
-## getAssetUrl(version, url)
-
-Returns the versioned URL for the asset.  Returns the URL for the asset in the
-filesystem cache when `charlotte.inNativeApp` is `true`.  You generally don't
-need to worry about this but there are some edge cases where the abstraction
-leaks and this method comes in handy, i.e. you want to set the background image
-for an element dynamically to an image asset:
-
-      var backgroundImageUrl = browser.getAssetUrl(page.version, '/img/my-background.jpg');
-      page.find('#my-element').css('background-image', "url('" + backgroundImageUrl + "')");
 
 ## loadTemplates(version, paths, callback)
 
